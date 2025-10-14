@@ -5,7 +5,7 @@ import org.jetbrains.exposed.sql.Table
 
 object FilamentTypeTable: Table() {
     val id: Column<Int> = integer(name = "id").autoIncrement()
-    val name: Column<String> = varchar(name = "name", length = 30)
+    val name: Column<String> = varchar(name = "name", length = 30).uniqueIndex()
 
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
