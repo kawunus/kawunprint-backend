@@ -36,7 +36,8 @@ dependencies {
     implementation("io.ktor:ktor-server-config-yaml:$ktor_version")
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("ch.qos.logback:logback-classic:1.4.11")
+    implementation("org.slf4j:slf4j-api:2.0.17")
 
     // Exposed + Database
     implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
