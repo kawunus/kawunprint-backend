@@ -2,11 +2,6 @@ package su.kawunprint.data.model.tables
 
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.Table.Dual.autoIncrement
-import org.jetbrains.exposed.sql.Table.Dual.bool
-import org.jetbrains.exposed.sql.Table.Dual.integer
-import org.jetbrains.exposed.sql.Table.Dual.uniqueIndex
-import org.jetbrains.exposed.sql.Table.Dual.varchar
 
 object UserTable: Table() {
     val id: Column<Int> = integer("id").autoIncrement()

@@ -7,6 +7,8 @@ import org.jetbrains.exposed.sql.Database
 import io.github.cdimascio.dotenv.dotenv
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
+import su.kawunprint.data.model.tables.FilamentTable
+import su.kawunprint.data.model.tables.FilamentTypeTable
 import su.kawunprint.data.model.tables.UserTable
 
 object DatabaseFactory {
@@ -22,7 +24,7 @@ object DatabaseFactory {
 
         transaction {
             SchemaUtils.create(
-                UserTable
+                UserTable, FilamentTable, FilamentTypeTable
             )
         }
     }
