@@ -6,4 +6,6 @@ import org.jetbrains.exposed.sql.Table
 object FilamentTypeTable: Table() {
     val id: Column<Int> = integer(name = "id").autoIncrement()
     val name: Column<String> = varchar(name = "name", length = 30)
+
+    override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
