@@ -5,6 +5,8 @@ import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.*
 import org.jetbrains.exposed.sql.Database
 import io.github.cdimascio.dotenv.dotenv
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import su.kawunprint.data.model.tables.FilamentTable
@@ -45,5 +47,11 @@ object DatabaseFactory {
         }
 
         return HikariDataSource(config)
+    }
+
+    suspend fun <T> dbQuery(block: () -> T): T {
+        return withContext(Dispatchers.IO) {
+            transaction { block() }
+        }
     }
 }
