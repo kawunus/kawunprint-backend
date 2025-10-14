@@ -49,6 +49,7 @@ dependencies {
 
     // Utils
     implementation("commons-codec:commons-codec:$commons_codec_version")
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.0")
 
     // Testing
     testImplementation("io.ktor:ktor-server-test-host:$ktor_version")
