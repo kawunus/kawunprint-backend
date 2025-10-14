@@ -5,7 +5,6 @@ val commons_codec_version: String by project
 val postgresql_version: String by project
 val exposed_version: String by project
 val hikari_version: String by project
-val h2_version: String by project // добавляем недостающую версию H2
 
 plugins {
     kotlin("jvm") version "2.2.20"
@@ -46,7 +45,6 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposed_version")
     implementation("org.postgresql:postgresql:$postgresql_version")
     implementation("com.zaxxer:HikariCP:$hikari_version")
-    implementation("com.h2database:h2:$h2_version")
 
     // Utils
     implementation("commons-codec:commons-codec:$commons_codec_version")
