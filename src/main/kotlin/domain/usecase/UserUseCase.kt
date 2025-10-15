@@ -13,4 +13,6 @@ class UserUseCase(
     suspend fun getUserByEmail(email: String) = userRepository.getUserByEmail(email)
 
     fun generateToken(userModel: UserModel) = jwtService.generateToken(userModel)
+
+    fun getVerifier() = jwtService.getVerifier()
 }

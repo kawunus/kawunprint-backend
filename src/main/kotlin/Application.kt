@@ -9,6 +9,7 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
     initDatabase()
+    configureDI()
     configureSecurity()
     configureSerialization()
     configureRouting()

@@ -12,19 +12,18 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.jetbrains.exposed.sql.*
+import org.koin.ktor.ext.inject
 import su.kawunprint.authentification.JwtService
 import su.kawunprint.data.repository.UserRepositoryImpl
 import su.kawunprint.domain.usecase.UserUseCase
 
 fun Application.configureSecurity() {
 
-    val jwtService = JwtService()
-    val userRepository = UserRepositoryImpl()
-    val userUseCase = UserUseCase(userRepository, jwtService)
+    val userUseCase: UserUseCase by inject()
 
     authentication {
         jwt {
-            verifier(jwtService.getVerifier())
+            verifier(userUseCase.getVerifier())
             realm = "ServiceServer"
             validate {
                 val payload = it.payload
