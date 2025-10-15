@@ -1,4 +1,4 @@
-package su.kawunprint.data.model.requests
+package su.kawunprint.data.model.requests.auth
 
 import kotlinx.serialization.Serializable
 

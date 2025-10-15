@@ -12,4 +12,6 @@ class FilamentTypeUseCase(private val repository: FilamentTypeRepository) {
     suspend fun deleteFilamentType(type: FilamentTypeModel) = repository.deleteFilamentType(type)
 
     suspend fun updateFilamentType(type: FilamentTypeModel) = repository.updateFilamentType(type)
+
+    suspend fun getFilamentTypeById(id: Int): FilamentTypeModel? = repository.getFilamentTypeById(id)
 }

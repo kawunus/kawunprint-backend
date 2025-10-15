@@ -9,7 +9,7 @@ import su.kawunprint.domain.usecase.UserUseCase
 fun Application.configureSecurity() {
     val userUseCase: UserUseCase by inject()
     authentication {
-        jwt {
+        jwt("jwt") {
             verifier(userUseCase.getVerifier())
             realm = "ServiceServer"
             validate {

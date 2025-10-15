@@ -30,12 +30,19 @@ class FilamentTypeRepositoryImpl : FilamentTypeRepository {
         }
     }
 
+
     override suspend fun updateFilamentType(type: FilamentTypeModel) {
         dbQuery {
             FilamentTypeTable.update({ FilamentTypeTable.id eq type.id }) { table ->
                 table[name] = type.name
                 table[description] = type.description
             }
+        }
+    }
+
+    override suspend fun getFilamentTypeById(id: Int): FilamentTypeModel? {
+        return dbQuery {
+            FilamentTypeTable.select { FilamentTypeTable.id eq id }.map { rowToModel(it) }.singleOrNull()
         }
     }
 

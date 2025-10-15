@@ -11,4 +11,6 @@ interface FilamentTypeRepository {
     suspend fun deleteFilamentType(type: FilamentTypeModel)
 
     suspend fun updateFilamentType(type: FilamentTypeModel)
+
+    suspend fun getFilamentTypeById(id: Int): FilamentTypeModel?
 }

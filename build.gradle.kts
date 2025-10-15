@@ -8,8 +8,8 @@ val hikari_version: String by project
 val koin_version: String by project
 
 plugins {
-    kotlin("jvm") version "1.9.0"
-    id("io.ktor.plugin") version "2.3.3"
+    kotlin("jvm") version "2.1.21"
+    id("io.ktor.plugin") version "3.3.1"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.0"
 }
 
@@ -34,6 +34,7 @@ dependencies {
     implementation("io.ktor:ktor-server-netty:$ktor_version")
     implementation("io.ktor:ktor-server-call-logging:$ktor_version")
     implementation("io.ktor:ktor-server-config-yaml:$ktor_version")
+    implementation("io.ktor:ktor-server-status-pages:$ktor_version")
 
     // Logging
     implementation("ch.qos.logback:logback-classic:$logback_version")

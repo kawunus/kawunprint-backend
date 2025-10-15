@@ -2,28 +2,24 @@ package su.kawunprint.routes
 
 import data.model.UserModel
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 import su.kawunprint.authentification.hashPassword
 import su.kawunprint.data.model.RoleModel
-import su.kawunprint.data.model.requests.LoginRequest
-import su.kawunprint.data.model.requests.RegisterRequest
+import su.kawunprint.data.model.requests.auth.LoginRequest
+import su.kawunprint.data.model.requests.auth.RegisterRequest
 import su.kawunprint.data.model.responses.BaseResponse
 import su.kawunprint.domain.usecase.UserUseCase
 import su.kawunprint.utils.Constants
 
-fun Route.UserRoute() {
-    val userUseCase: UserUseCase by inject()
+fun Route.userRoute() {
+    val userUseCase: UserUseCase by inject<UserUseCase>()
     val hashFunction = { p: String -> hashPassword(password = p) }
 
     post("/api/v1/register") {
-        val registerRequest = call.receiveNullable<RegisterRequest>() ?: run {
-            call.respond(HttpStatusCode.BadRequest, BaseResponse(false, Constants.Error.GENERAL_ERROR))
-            return@post
-        }
+        val registerRequest = call.receive<RegisterRequest>()
 
         try {
             val user = UserModel(
@@ -41,30 +37,44 @@ fun Route.UserRoute() {
             val token = userUseCase.generateToken(user)
             call.respond(HttpStatusCode.OK, BaseResponse(true, token))
         } catch (e: Exception) {
-            call.respond(HttpStatusCode.Conflict, BaseResponse(false, e.message ?: Constants.Error.GENERAL_ERROR))
+            call.respond(HttpStatusCode.Conflict, BaseResponse(false, e.message ?: Constants.ErrorMessages.GENERAL))
         }
     }
 
     post("/api/v1/login") {
         val loginRequest = call.receiveNullable<LoginRequest>() ?: run {
-            call.respond(HttpStatusCode.BadRequest, BaseResponse(false, Constants.Error.GENERAL_ERROR))
-            return@post
+            return@post call.respond(HttpStatusCode.BadRequest, BaseResponse(false, Constants.ErrorMessages.GENERAL))
         }
 
         try {
             val user = userUseCase.getUserByEmail(loginRequest.email.trim().lowercase())
             if (user == null) {
-                call.respond(HttpStatusCode.BadRequest, BaseResponse(false, Constants.Error.WRONG_EMAIL))
+                return@post call.respond(
+                    HttpStatusCode.BadRequest, BaseResponse(
+                        false, Constants.ErrorMessages
+                            .WRONG_EMAIL
+                    )
+                )
             } else {
                 if (user.password == hashFunction(loginRequest.password)) {
                     val token = userUseCase.generateToken(user)
-                    call.respond(HttpStatusCode.OK, BaseResponse(true, token))
+                    return@post call.respond(HttpStatusCode.OK, BaseResponse(true, token))
                 } else {
-                    call.respond(HttpStatusCode.BadRequest, BaseResponse(false, Constants.Error.WRONG_PASSWORD))
+                    return@post call.respond(
+                        HttpStatusCode.BadRequest, BaseResponse(
+                            false, Constants.ErrorMessages
+                                .WRONG_PASSWORD
+                        )
+                    )
                 }
             }
         } catch (e: Exception) {
-            call.respond(HttpStatusCode.Conflict, BaseResponse(false, e.message ?: Constants.Error.GENERAL_ERROR))
+            return@post call.respond(
+                HttpStatusCode.Conflict, BaseResponse(
+                    false, e.message ?: Constants
+                        .ErrorMessages.GENERAL
+                )
+            )
         }
     }
 }

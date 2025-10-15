@@ -22,7 +22,7 @@ class JwtService {
 
     fun generateToken(user: UserModel): String {
         return JWT.create()
-            .withSubject("KawunPrintAuthentification")
+            .withSubject("KawunPrintAuthentication")
             .withIssuer(issuer)
             .withClaim("email", user.email)
             .withExpiresAt(LocalDateTime.now().plusDays(8).toInstant(ZoneOffset.UTC))

@@ -2,11 +2,15 @@ package su.kawunprint.plugins
 
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
-import su.kawunprint.routes.UserRoute
+import su.kawunprint.routes.filamentRoute
+import su.kawunprint.routes.filamentTypeRoute
+import su.kawunprint.routes.userRoute
 
 fun Application.configureRouting() {
 
     routing {
-        UserRoute()
+        userRoute()
+        filamentRoute()
+        filamentTypeRoute()
     }
 }
