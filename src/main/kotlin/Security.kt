@@ -18,9 +18,7 @@ import su.kawunprint.data.repository.UserRepositoryImpl
 import su.kawunprint.domain.usecase.UserUseCase
 
 fun Application.configureSecurity() {
-
     val userUseCase: UserUseCase by inject()
-
     authentication {
         jwt {
             verifier(userUseCase.getVerifier())
@@ -29,6 +27,7 @@ fun Application.configureSecurity() {
                 val payload = it.payload
                 val email = payload.getClaim("email").asString()
                 val user = userUseCase.getUserByEmail(email)
+                user
             }
         }
     }
