@@ -2,12 +2,12 @@ package su.kawunprint.data.repository
 
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import su.kawunprint.DatabaseFactory.dbQuery
 import su.kawunprint.data.model.FilamentModel
 import su.kawunprint.data.model.FilamentTypeModel
 import su.kawunprint.data.model.tables.FilamentTable
 import su.kawunprint.data.model.tables.FilamentTypeTable
 import su.kawunprint.domain.repository.FilamentRepository
+import su.kawunprint.plugins.Databases.dbQuery
 
 class FilamentRepositoryImpl : FilamentRepository {
 

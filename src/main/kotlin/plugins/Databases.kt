@@ -1,19 +1,19 @@
-package su.kawunprint
+package su.kawunprint.plugins
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.server.application.*
-import org.jetbrains.exposed.sql.Database
 import io.github.cdimascio.dotenv.dotenv
+import io.ktor.server.application.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import su.kawunprint.data.model.tables.FilamentTable
 import su.kawunprint.data.model.tables.FilamentTypeTable
 import su.kawunprint.data.model.tables.UserTable
 
-object DatabaseFactory {
+object Databases {
 
     private val dotenv = dotenv()
 

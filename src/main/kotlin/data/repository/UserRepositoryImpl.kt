@@ -4,12 +4,11 @@ import data.model.UserModel
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
-import su.kawunprint.DatabaseFactory.dbQuery
-import su.kawunprint.data.model.RoleModel
 import su.kawunprint.data.model.getRoleByString
 import su.kawunprint.data.model.getStringByRole
 import su.kawunprint.data.model.tables.UserTable
 import su.kawunprint.domain.repository.UserRepository
+import su.kawunprint.plugins.Databases.dbQuery
 
 class UserRepositoryImpl : UserRepository {
 
