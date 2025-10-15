@@ -1,11 +1,14 @@
 package su.kawunprint.routes
 
 import data.model.UserModel
+import data.model.requests.user.UpdateUserRequest
 import io.ktor.http.*
+import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
+import su.kawunprint.authentification.authenticateWithRole
 import su.kawunprint.authentification.hashPassword
 import su.kawunprint.data.model.RoleModel
 import su.kawunprint.data.model.requests.auth.LoginRequest
@@ -75,6 +78,84 @@ fun Route.userRoute() {
                         .ErrorMessages.GENERAL
                 )
             )
+        }
+    }
+
+    authenticate("jwt") {
+        route("/api/v1/users") {
+            get {
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
+                try {
+                    val users = userUseCase.getAllUsers()
+                    call.respond(HttpStatusCode.OK, users)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    call.respond(HttpStatusCode.InternalServerError)
+                }
+            }
+
+            get("/{id}") {
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
+                val id = call.parameters["id"]?.toIntOrNull()
+                    ?: return@get call.respond(HttpStatusCode.BadRequest)
+                val user = userUseCase.getUserById(id)
+                    ?: return@get call.respond(HttpStatusCode.NotFound)
+                call.respond(HttpStatusCode.OK, user)
+            }
+
+            delete("/{id}") {
+                call.authenticateWithRole(RoleModel.ADMIN)
+                val id = call.parameters["id"]?.toIntOrNull()
+                    ?: return@delete call.respond(HttpStatusCode.BadRequest)
+                try {
+                    userUseCase.deleteUserById(id)
+                    call.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    call.respond(HttpStatusCode.InternalServerError)
+                }
+            }
+
+            post("/{id}") {
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
+                val id = call.parameters["id"]?.toIntOrNull()
+                    ?: return@post call.respond(HttpStatusCode.BadRequest)
+                val request = call.receive<UpdateUserRequest>()
+
+                try {
+                    val updatedUser = userUseCase.updateUser(
+                        UserModel(
+                            id = id,
+                            firstName = request.firstName,
+                            lastName = request.lastName,
+                            email = request.email,
+                            phoneNumber = request.phoneNumber,
+                            password = hashFunction(request.password),
+                            role = request.role,
+                            isActive = request.isActive
+                        )
+                    )
+                    call.respond(HttpStatusCode.OK, updatedUser)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    call.respond(HttpStatusCode.InternalServerError)
+                }
+            }
+
+            post("/{id}/role") {
+                call.authenticateWithRole(RoleModel.ADMIN)
+                val id = call.parameters["id"]?.toIntOrNull()
+                    ?: return@post call.respond(HttpStatusCode.BadRequest)
+                val newRole = call.parameters["role"] ?: return@post call.respond(HttpStatusCode.BadRequest)
+
+                try {
+                    userUseCase.updateUserRoleById(id, RoleModel.valueOf(newRole.uppercase()))
+                    call.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    call.respond(HttpStatusCode.InternalServerError)
+                }
+            }
         }
     }
 }
