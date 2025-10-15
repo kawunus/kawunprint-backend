@@ -64,7 +64,9 @@ class FilamentRepositoryImpl : FilamentRepository {
             id = row[FilamentTable.id],
             color = row[FilamentTable.color],
             type = type,
-            pricePerGram = row[FilamentTable.pricePerGram]
+            pricePerGram = row[FilamentTable.pricePerGram],
+            residue = row[FilamentTable.residue],
+            hexColor = row[FilamentTable.hexColor],
         )
     }
 }

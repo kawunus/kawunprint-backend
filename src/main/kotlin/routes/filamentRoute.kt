@@ -52,7 +52,9 @@ fun Route.filamentRoute() {
                 val filament = FilamentModel(
                     color = body.color,
                     pricePerGram = body.pricePerGram,
-                    type = filamentType
+                    type = filamentType,
+                    residue = body.residue,
+                    hexColor = body.hexColor,
                 )
 
                 filamentUseCase.createFilament(filament)
@@ -73,7 +75,9 @@ fun Route.filamentRoute() {
                     id = id,
                     color = body.color,
                     pricePerGram = body.pricePerGram,
-                    type = filamentType
+                    type = filamentType,
+                    residue = body.residue,
+                    hexColor = body.hexColor,
                 )
 
                 filamentUseCase.updateFilament(filament)

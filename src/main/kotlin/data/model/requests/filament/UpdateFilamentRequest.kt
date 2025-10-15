@@ -6,5 +6,7 @@ import kotlinx.serialization.Serializable
 data class UpdateFilamentRequest(
     val color: String,
     val typeId: Int,
-    val pricePerGram: Int
+    val pricePerGram: Double,
+    val residue: Int,
+    val hexColor: String,
 )
