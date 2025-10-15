@@ -11,7 +11,7 @@ object UserTable: Table() {
     val lastName: Column<String> = varchar("last_name", 30)
     val role: Column<String> = varchar("user_role", 32)
     val isActive: Column<Boolean> = bool("is_active")
-    val phone: Column<String> = varchar("phone", 64)
+    val phoneNumber: Column<String> = varchar("phone", 64)
 
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }

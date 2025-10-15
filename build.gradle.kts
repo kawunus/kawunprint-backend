@@ -5,11 +5,12 @@ val commons_codec_version: String by project
 val postgresql_version: String by project
 val exposed_version: String by project
 val hikari_version: String by project
+val koin_version: String by project
 
 plugins {
-    kotlin("jvm") version "2.2.20"
-    id("io.ktor.plugin") version "3.3.0"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
+    kotlin("jvm") version "1.9.0"
+    id("io.ktor.plugin") version "2.3.3"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.0"
 }
 
 group = "su.kawunprint"
@@ -35,7 +36,7 @@ dependencies {
     implementation("io.ktor:ktor-server-config-yaml:$ktor_version")
 
     // Logging
-    implementation("ch.qos.logback:logback-classic:1.4.11")
+    implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("org.slf4j:slf4j-api:2.0.17")
 
     // Exposed + Database
@@ -50,11 +51,11 @@ dependencies {
     implementation("commons-codec:commons-codec:$commons_codec_version")
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.0")
 
+    // Koin DI
+    implementation("io.insert-koin:koin-ktor:$koin_version")
+    implementation("io.insert-koin:koin-logger-slf4j:$koin_version")
+
     // Testing
     testImplementation("io.ktor:ktor-server-test-host:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-
-    // DI
-    implementation("io.insert-koin:koin-ktor:3.5.6")
-    implementation("io.insert-koin:koin-logger-slf4j:3.5.6")
 }

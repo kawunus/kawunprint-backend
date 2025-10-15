@@ -29,7 +29,7 @@ class UserRepositoryImpl : UserRepository {
                 table[UserTable.password] = user.password
                 table[UserTable.firstName] = user.firstName
                 table[UserTable.lastName] = user.lastName
-                table[UserTable.phone] = user.phoneNumber
+                table[UserTable.phoneNumber] = user.phoneNumber
                 table[UserTable.role] = user.role.getStringByRole()
                 table[UserTable.isActive] = user.isActive
             }
@@ -47,7 +47,7 @@ class UserRepositoryImpl : UserRepository {
             password = row[UserTable.password],
             lastName = row[UserTable.lastName],
             firstName = row[UserTable.firstName],
-            phoneNumber = row[UserTable.phone],
+            phoneNumber = row[UserTable.phoneNumber],
             isActive = row[UserTable.isActive],
             role = row[UserTable.role].getRoleByString()
         )
