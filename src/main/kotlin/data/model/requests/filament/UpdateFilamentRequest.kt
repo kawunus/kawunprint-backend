@@ -1,9 +1,9 @@
-package su.kawunprint.data.model.requests.filament
+package data.model.requests.filament
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CreateFilamentRequest(
+data class UpdateFilamentRequest(
     val color: String,
     val typeId: Int,
     val pricePerGram: Int
