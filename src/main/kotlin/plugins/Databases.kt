@@ -2,6 +2,7 @@ package su.kawunprint.plugins
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import data.model.tables.CartTable
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.server.application.*
 import kotlinx.coroutines.Dispatchers
@@ -9,9 +10,7 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import su.kawunprint.data.model.tables.FilamentTable
-import su.kawunprint.data.model.tables.FilamentTypeTable
-import su.kawunprint.data.model.tables.UserTable
+import su.kawunprint.data.model.tables.*
 
 object Databases {
 
@@ -26,7 +25,7 @@ object Databases {
 
         transaction {
             SchemaUtils.create(
-                UserTable, FilamentTable, FilamentTypeTable
+                UserTable, FilamentTable, FilamentTypeTable, OrderTable, OrderHistoryTable, PrinterTable, CartTable
             )
         }
     }
