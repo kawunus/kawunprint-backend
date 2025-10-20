@@ -1,5 +1,6 @@
 package su.kawunprint.di
 
+import domain.usecase.PrinterUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 import su.kawunprint.domain.usecase.FilamentTypeUseCase
@@ -12,4 +13,6 @@ val domainModule = module {
     factoryOf(::FilamentUseCase)
 
     factoryOf(::FilamentTypeUseCase)
+
+    factoryOf(::PrinterUseCase)
 }
