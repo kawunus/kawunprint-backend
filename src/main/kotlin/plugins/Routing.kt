@@ -3,6 +3,8 @@ package su.kawunprint.plugins
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import routes.cartRoute
+import routes.orderHistoryRoute
+import routes.orderRoute
 import routes.printerRoute
 import su.kawunprint.routes.filamentRoute
 import su.kawunprint.routes.filamentTypeRoute
@@ -16,5 +18,7 @@ fun Application.configureRouting() {
         filamentTypeRoute()
         printerRoute()
         cartRoute()
+        orderRoute()
+        orderHistoryRoute()
     }
 }
