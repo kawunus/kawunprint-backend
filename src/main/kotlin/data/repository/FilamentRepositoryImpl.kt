@@ -69,4 +69,13 @@ class FilamentRepositoryImpl : FilamentRepository {
             hexColor = row[FilamentTable.hexColor],
         )
     }
+
+    override suspend fun getFilamentById(id: Int): FilamentModel? {
+        return dbQuery {
+            (FilamentTable innerJoin FilamentTypeTable)
+                .select { FilamentTable.id eq id }
+                .map { rowToModelJoined(it) }
+                .singleOrNull()
+        }
+    }
 }

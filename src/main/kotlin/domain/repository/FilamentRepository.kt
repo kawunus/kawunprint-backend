@@ -13,4 +13,6 @@ interface FilamentRepository {
     suspend fun updateFilament(filament: FilamentModel)
 
     suspend fun deleteFilament(filament: FilamentModel)
+
+    suspend fun getFilamentById(id: Int): FilamentModel?
 }

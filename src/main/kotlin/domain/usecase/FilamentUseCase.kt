@@ -14,4 +14,6 @@ class FilamentUseCase(private val filamentRepository: FilamentRepository) {
     suspend fun updateFilament(filament: FilamentModel) = filamentRepository.updateFilament(filament)
 
     suspend fun deleteFilament(filament: FilamentModel) = filamentRepository.deleteFilament(filament)
+
+    suspend fun getFilamentById(id: Int): FilamentModel? = filamentRepository.getFilamentById(id)
 }

@@ -1,7 +1,9 @@
 package su.kawunprint.di
 
+import data.repository.CartRepositoryImpl
 import data.repository.PrinterRepositoryImpl
 import data.repository.UserRepositoryImpl
+import domain.repository.CartRepository
 import domain.repository.PrinterRepository
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -23,4 +25,6 @@ val dataModule = module {
     singleOf(::FilamentTypeRepositoryImpl) bind FilamentTypeRepository::class
 
     singleOf(::PrinterRepositoryImpl) bind PrinterRepository::class
+
+    singleOf(::CartRepositoryImpl) bind CartRepository::class
 }
