@@ -1,4 +1,3 @@
-// path: su/kawunprint/routes/CartRoute.kt
 package routes
 
 import data.model.CartModel

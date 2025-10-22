@@ -8,7 +8,7 @@ val hikari_version: String by project
 val koin_version: String by project
 
 plugins {
-    kotlin("jvm") version "2.1.21"
+    kotlin("jvm") version "2.2.20"
     id("io.ktor.plugin") version "3.3.1"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.0"
 }
@@ -59,4 +59,7 @@ dependencies {
     // Testing
     testImplementation("io.ktor:ktor-server-test-host:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+
+    implementation("io.ktor:ktor-server-swagger:$ktor_version")
+    implementation("io.ktor:ktor-server-cors:$ktor_version")
 }

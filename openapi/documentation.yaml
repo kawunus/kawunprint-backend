@@ -1,0 +1,1479 @@
+openapi: "3.0.3"
+info:
+  title: "Kawunprint API"
+  description: "Это OpenAPI спецификация для API сервиса 3D-печати 'Kawunprint'. API позволяет клиентам делать заказы на печать, управлять корзиной, а сотрудникам и администраторам управлять заказами, филаментами и принтерами."
+  version: "1.0.0"
+servers:
+  - url: "https://backend"
+    description: "Основной сервер"
+tags:
+  - name: "Заказы"
+    description: "Операции, связанные с заказами и их историей"
+  - name: "Корзина"
+    description: "Управление корзиной пользователя"
+  - name: "Филаменты"
+    description: "Управление филаментами (материалами для печати) и их типами"
+  - name: "Принтеры"
+    description: "Управление принтерами"
+  - name: "Пользователи"
+    description: "Управление пользователями и их ролями"
+  - name: "Аутентификация"
+    description: "Операции входа и регистрации"
+paths:
+  /{orderId}/history:
+    get:
+      tags:
+        - "Заказы"
+      summary: "Получить историю заказа"
+      description: "Возвращает полную историю изменений статуса и комментариев для конкретного заказа."
+      operationId: "getOrderHistory"
+      parameters:
+        - name: "orderId"
+          in: "path"
+          description: "ID заказа для получения истории"
+          required: true
+          schema:
+            type: "integer"
+            example: 101
+      responses:
+        "200":
+          description: "Успешный ответ. Возвращает массив записей истории."
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/OrderHistoryModel"
+        "400":
+          description: "Некорректный запрос (например, неверный ID)"
+        "403":
+          description: "Доступ запрещен"
+        "404":
+          description: "Заказ с указанным ID не найден"
+    post:
+      tags:
+        - "Заказы"
+      summary: "Добавить запись в историю заказа"
+      description: "Добавляет новую запись о смене статуса или комментарий в историю заказа. Обычно выполняется сотрудником."
+      operationId: "addOrderHistory"
+      parameters:
+        - name: "orderId"
+          in: "path"
+          description: "ID заказа, в который добавляется запись"
+          required: true
+          schema:
+            type: "integer"
+            example: 102
+      requestBody:
+        description: "Данные для новой записи в истории"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderHistoryRequest"
+      responses:
+        "201":
+          description: "Запись успешно создана"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrderHistoryModel"
+        "400":
+          description: "Некорректный запрос"
+        "401":
+          description: "Необходима авторизация"
+        "404":
+          description: "Заказ не найден"
+        "500":
+          description: "Внутренняя ошибка сервера"
+  /api/v1/cart:
+    get:
+      tags:
+        - "Корзина"
+      summary: "Получить содержимое корзины"
+      description: "Возвращает все товары в корзине текущего пользователя."
+      operationId: "getCart"
+      responses:
+        "200":
+          description: "Успешный ответ. Возвращает массив товаров в корзине."
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/CartModel"
+    post:
+      tags:
+        - "Корзина"
+      summary: "Добавить товар в корзину"
+      description: "Добавляет новый товар (модель для печати) в корзину пользователя."
+      operationId: "addToCart"
+      requestBody:
+        description: "Данные нового товара"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCartItemRequest"
+      responses:
+        "201":
+          description: "Товар успешно добавлен в корзину"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CartModel"
+        "400":
+          description: "Некорректный запрос. Например, неверный ID филамента."
+        "401":
+          description: "Необходима авторизация"
+        "500":
+          description: "Внутренняя ошибка сервера"
+  /api/v1/cart/{id}:
+    delete:
+      tags:
+        - "Корзина"
+      summary: "Удалить товар из корзины"
+      description: "Удаляет товар по его ID из корзины пользователя."
+      operationId: "deleteCartItem"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID товара в корзине для удаления"
+          required: true
+          schema:
+            type: "integer"
+            example: 12
+      responses:
+        "200":
+          description: "Товар успешно удален"
+        "400":
+          description: "Некорректный запрос"
+        "403":
+          description: "Доступ запрещен (попытка удалить чужой товар)"
+        "404":
+          description: "Товар не найден"
+    put:
+      tags:
+        - "Корзина"
+      summary: "Обновить товар в корзине"
+      description: "Обновляет данные товара в корзине, например, выбранный филамент или комментарий."
+      operationId: "updateCartItem"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID товара в корзине для обновления"
+          required: true
+          schema:
+            type: "integer"
+            example: 13
+      requestBody:
+        description: "Новые данные для товара"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCartItemRequest"
+      responses:
+        "200":
+          description: "Товар успешно обновлен"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CartModel"
+        "400":
+          description: "Некорректный запрос. Например, неверный ID филамента."
+        "403":
+          description: "Доступ запрещен"
+        "404":
+          description: "Товар не найден"
+  /api/v1/filaments:
+    get:
+      tags:
+        - "Филаменты"
+      summary: "Получить список филаментов"
+      description: "Возвращает список всех доступных филаментов. Можно фильтровать по типу."
+      operationId: "getFilaments"
+      parameters:
+        - name: "typeId"
+          in: "query"
+          description: "ID типа филамента для фильтрации"
+          required: false
+          schema:
+            type: "integer"
+            example: 1
+      responses:
+        "200":
+          description: "Список филаментов"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/FilamentModel"
+    post:
+      tags:
+        - "Филаменты"
+      summary: "Создать новый филамент"
+      description: "Добавляет новый вид филамента в систему. Требует прав администратора."
+      operationId: "createFilament"
+      requestBody:
+        description: "Данные нового филамента"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFilamentRequest"
+      responses:
+        "201":
+          description: "Филамент успешно создан"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FilamentModel"
+        "400":
+          description: "Некорректный запрос. Например, неверный ID типа филамента."
+        "401":
+          description: "Необходима авторизация"
+  /api/v1/filaments/{id}:
+    delete:
+      tags:
+        - "Филаменты"
+      summary: "Удалить филамент"
+      description: "Удаляет филамент по ID. Требует прав администратора."
+      operationId: "deleteFilament"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID филамента для удаления"
+          required: true
+          schema:
+            type: "integer"
+            example: 4
+      responses:
+        "200":
+          description: "Филамент успешно удален"
+        "400":
+          description: "Некорректный запрос"
+        "401":
+          description: "Необходима авторизация"
+        "404":
+          description: "Филамент не найден"
+    get:
+      tags:
+        - "Филаменты"
+      summary: "Получить филамент по ID"
+      description: "Возвращает подробную информацию о филаменте по его ID."
+      operationId: "getFilamentById"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID филамента"
+          required: true
+          schema:
+            type: "integer"
+            example: 5
+      responses:
+        "200":
+          description: "Информация о филаменте"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FilamentModel"
+        "400":
+          description: "Некорректный запрос"
+        "404":
+          description: "Филамент не найден"
+    put:
+      tags:
+        - "Филаменты"
+      summary: "Обновить филамент"
+      description: "Обновляет данные филамента по ID. Требует прав администратора."
+      operationId: "updateFilament"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID филамента для обновления"
+          required: true
+          schema:
+            type: "integer"
+            example: 6
+      requestBody:
+        description: "Новые данные для филамента"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFilamentRequest"
+      responses:
+        "200":
+          description: "Филамент успешно обновлен"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FilamentModel"
+        "400":
+          description: "Некорректный запрос. Например, неверный ID типа."
+        "401":
+          description: "Необходима авторизация"
+  /api/v1/filaments/types:
+    get:
+      tags:
+        - "Филаменты"
+      summary: "Получить типы филаментов"
+      description: "Возвращает список всех доступных типов филаментов (например, PLA, ABS)."
+      operationId: "getFilamentTypes"
+      responses:
+        "200":
+          description: "Список типов филаментов"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/FilamentTypeModel"
+    post:
+      tags:
+        - "Филаменты"
+      summary: "Создать тип филамента"
+      description: "Создает новый тип филамента. Требует прав администратора."
+      operationId: "createFilamentType"
+      requestBody:
+        description: "Название и описание нового типа"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFilamentTypeRequest"
+      responses:
+        "201":
+          description: "Тип успешно создан"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FilamentTypeModel"
+        "401":
+          description: "Необходима авторизация"
+        "500":
+          description: "Внутренняя ошибка сервера"
+  /api/v1/filaments/types/{id}:
+    delete:
+      tags:
+        - "Филаменты"
+      summary: "Удалить тип филамента"
+      description: "Удаляет тип филамента по ID. Требует прав администратора."
+      operationId: "deleteFilamentType"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID типа для удаления"
+          required: true
+          schema:
+            type: "integer"
+            example: 3
+      responses:
+        "200":
+          description: "Тип успешно удален"
+        "400":
+          description: "Некорректный запрос"
+        "401":
+          description: "Необходима авторизация"
+        "404":
+          description: "Тип не найден"
+    get:
+      tags:
+        - "Филаменты"
+      summary: "Получить тип филамента по ID"
+      description: "Возвращает информацию о типе филамента по его ID."
+      operationId: "getFilamentTypeById"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID типа филамента"
+          required: true
+          schema:
+            type: "string"
+            example: "2"
+      responses:
+        "200":
+          description: "Информация о типе"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FilamentTypeModel"
+        "400":
+          description: "Некорректный запрос"
+        "404":
+          description: "Тип не найден"
+    post:
+      tags:
+        - "Филаменты"
+      summary: "Обновить тип филамента"
+      description: "Обновляет данные типа филамента. Требует прав администратора."
+      operationId: "updateFilamentType"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID типа для обновления"
+          required: true
+          schema:
+            type: "integer"
+            example: 1
+      requestBody:
+        description: "Новые данные для типа"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFilamentTypeRequest"
+      responses:
+        "200":
+          description: "Тип успешно обновлен"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FilamentTypeModel"
+        "400":
+          description: "Некорректный запрос"
+        "401":
+          description: "Необходима авторизация"
+        "500":
+          description: "Внутренняя ошибка сервера"
+  /api/v1/login:
+    post:
+      tags:
+        - "Аутентификация"
+      summary: "Вход в систему"
+      description: "Аутентифицирует пользователя по email и паролю, возвращая токен доступа."
+      operationId: "loginUser"
+      responses:
+        "200":
+          description: "Успешный вход"
+        "400":
+          description: "Неверный email или пароль"
+        "409":
+          description: "Конфликт. Возможны проблемы с состоянием пользователя."
+  /api/v1/orders:
+    get:
+      tags:
+        - "Заказы"
+      summary: "Получить список заказов"
+      description: "Возвращает список заказов. Для клиента - только его заказы, для сотрудников и администраторов - все заказы."
+      operationId: "getOrders"
+      responses:
+        "200":
+          description: "Список заказов"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/OrderModel"
+    post:
+      tags:
+        - "Заказы"
+      summary: "Создать новый заказ"
+      description: "Создает новый заказ из товаров, находящихся в корзине пользователя."
+      operationId: "createOrder"
+      requestBody:
+        description: "Данные для нового заказа"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+      responses:
+        "201":
+          description: "Заказ успешно создан"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrderModel"
+        "401":
+          description: "Необходима авторизация"
+        "500":
+          description: "Внутренняя ошибка сервера"
+  /api/v1/orders/{id}:
+    delete:
+      tags:
+        - "Заказы"
+      summary: "Удалить заказ"
+      description: "Удаляет заказ по ID. Требует прав администратора."
+      operationId: "deleteOrder"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID заказа для удаления"
+          required: true
+          schema:
+            type: "integer"
+            example: 201
+      responses:
+        "200":
+          description: "Заказ успешно удален"
+        "400":
+          description: "Некорректный запрос"
+        "401":
+          description: "Необходима авторизация"
+        "404":
+          description: "Заказ не найден"
+    get:
+      tags:
+        - "Заказы"
+      summary: "Получить заказ по ID"
+      description: "Возвращает подробную информацию о заказе по его ID."
+      operationId: "getOrderById"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID заказа"
+          required: true
+          schema:
+            type: "integer"
+            example: 202
+      responses:
+        "200":
+          description: "Информация о заказе"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrderModel"
+        "400":
+          description: "Некорректный запрос"
+        "403":
+          description: "Доступ запрещен (попытка просмотра чужого заказа)"
+        "404":
+          description: "Заказ не найден"
+    put:
+      tags:
+        - "Заказы"
+      summary: "Обновить заказ"
+      description: "Обновляет данные заказа, такие как статус, ответственный сотрудник или цена. Требует прав сотрудника или администратора."
+      operationId: "updateOrder"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID заказа для обновления"
+          required: true
+          schema:
+            type: "integer"
+            example: 203
+      requestBody:
+        description: "Новые данные для заказа"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrderRequest"
+      responses:
+        "200":
+          description: "Заказ успешно обновлен"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrderModel"
+        "400":
+          description: "Некорректный запрос (например, неверный ID сотрудника)"
+        "401":
+          description: "Необходима авторизация"
+        "404":
+          description: "Заказ не найден"
+  /api/v1/printers:
+    get:
+      tags:
+        - "Принтеры"
+      summary: "Получить список принтеров"
+      description: "Возвращает список всех принтеров в системе. Требует прав сотрудника или администратора."
+      operationId: "getPrinters"
+      responses:
+        "200":
+          description: "Список принтеров"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PrinterModel"
+        "401":
+          description: "Необходима авторизация"
+    post:
+      tags:
+        - "Принтеры"
+      summary: "Добавить новый принтер"
+      description: "Добавляет новый принтер в систему. Требует прав администратора."
+      operationId: "addPrinter"
+      requestBody:
+        description: "Данные нового принтера"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PrinterModel"
+      responses:
+        "201":
+          description: "Принтер успешно добавлен"
+        "401":
+          description: "Необходима авторизация"
+  /api/v1/printers/{id}:
+    delete:
+      tags:
+        - "Принтеры"
+      summary: "Удалить принтер"
+      description: "Удаляет принтер из системы по ID. Требует прав администратора."
+      operationId: "deletePrinter"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID принтера для удаления"
+          required: true
+          schema:
+            type: "integer"
+            example: 7
+      responses:
+        "200":
+          description: "Принтер успешно удален"
+        "400":
+          description: "Некорректный запрос"
+        "401":
+          description: "Необходима авторизация"
+    get:
+      tags:
+        - "Принтеры"
+      summary: "Получить принтер по ID"
+      description: "Возвращает информацию о принтере по его ID. Требует прав сотрудника или администратора."
+      operationId: "getPrinterById"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID принтера"
+          required: true
+          schema:
+            type: "integer"
+            example: 8
+      responses:
+        "200":
+          description: "Информация о принтере"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PrinterModel"
+        "400":
+          description: "Некорректный запрос"
+        "401":
+          description: "Необходима авторизация"
+        "404":
+          description: "Принтер не найден"
+    put:
+      tags:
+        - "Принтеры"
+      summary: "Обновить принтер"
+      description: "Обновляет информацию о принтере. Требует прав администратора."
+      operationId: "updatePrinter"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID принтера для обновления"
+          required: true
+          schema:
+            type: "integer"
+            example: 9
+      requestBody:
+        description: "Новые данные принтера"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PrinterModel"
+      responses:
+        "200":
+          description: "Принтер успешно обновлен"
+        "400":
+          description: "Некорректный запрос"
+        "401":
+          description: "Необходима авторизация"
+  /api/v1/printers/{id}/active:
+    patch:
+      tags:
+        - "Принтеры"
+      summary: "Изменить статус активности принтера"
+      description: "Устанавливает или снимает флаг активности принтера (включен/выключен)."
+      operationId: "setPrinterActiveState"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID принтера"
+          required: true
+          schema:
+            type: "integer"
+            example: 10
+        - name: "state"
+          in: "query"
+          description: "Новое состояние активности (true/false)"
+          required: false
+          schema:
+            type: "boolean"
+            example: true
+      responses:
+        "200":
+          description: "Статус успешно изменен"
+        "400":
+          description: "Некорректный запрос (отсутствует параметр 'state')"
+        "401":
+          description: "Необходима авторизация"
+  /api/v1/printers/active:
+    get:
+      tags:
+        - "Принтеры"
+      summary: "Получить принтеры по статусу активности"
+      description: "Возвращает список активных или неактивных принтеров."
+      operationId: "getActivePrinters"
+      parameters:
+        - name: "state"
+          in: "query"
+          description: "Состояние активности для фильтрации (true/false)"
+          required: false
+          schema:
+            type: "boolean"
+            example: true
+      responses:
+        "200":
+          description: "Список принтеров"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PrinterModel"
+        "400":
+          description: "Некорректный запрос"
+        "401":
+          description: "Необходима авторизация"
+  /api/v1/register:
+    post:
+      tags:
+        - "Аутентификация"
+      summary: "Регистрация нового пользователя"
+      description: "Создает новую учетную запись клиента."
+      operationId: "registerUser"
+      requestBody:
+        description: "Данные для регистрации нового пользователя"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "200":
+          description: "Пользователь успешно зарегистрирован"
+        "409":
+          description: "Конфликт. Пользователь с таким email уже существует."
+  /api/v1/users:
+    get:
+      tags:
+        - "Пользователи"
+      summary: "Получить список пользователей"
+      description: "Возвращает список всех пользователей системы. Требует прав администратора."
+      operationId: "getUsers"
+      responses:
+        "200":
+          description: "Список пользователей"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/UserModel"
+        "401":
+          description: "Необходима авторизация"
+        "500":
+          description: "Внутренняя ошибка сервера"
+  /api/v1/users/{id}:
+    delete:
+      tags:
+        - "Пользователи"
+      summary: "Удалить пользователя"
+      description: "Удаляет пользователя по ID. Требует прав администратора."
+      operationId: "deleteUser"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID пользователя для удаления"
+          required: true
+          schema:
+            type: "integer"
+            example: 301
+      responses:
+        "200":
+          description: "Пользователь успешно удален"
+        "400":
+          description: "Некорректный запрос"
+        "401":
+          description: "Необходима авторизация"
+        "500":
+          description: "Внутренняя ошибка сервера"
+    get:
+      tags:
+        - "Пользователи"
+      summary: "Получить пользователя по ID"
+      description: "Возвращает информацию о пользователе по его ID. Требует прав администратора."
+      operationId: "getUserById"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID пользователя"
+          required: true
+          schema:
+            type: "integer"
+            example: 302
+      responses:
+        "200":
+          description: "Информация о пользователе"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserModel"
+        "400":
+          description: "Некорректный запрос"
+        "401":
+          description: "Необходима авторизация"
+        "404":
+          description: "Пользователь не найден"
+    post:
+      tags:
+        - "Пользователи"
+      summary: "Обновить пользователя"
+      description: "Обновляет данные пользователя по ID. Требует прав администратора."
+      operationId: "updateUser"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID пользователя для обновления"
+          required: true
+          schema:
+            type: "integer"
+            example: 303
+      requestBody:
+        description: "Новые данные пользователя"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      responses:
+        "200":
+          description: "Пользователь успешно обновлен"
+        "400":
+          description: "Некорректный запрос"
+        "401":
+          description: "Необходима авторизация"
+        "500":
+          description: "Внутренняя ошибка сервера"
+  /api/v1/users/{id}/role:
+    post:
+      tags:
+        - "Пользователи"
+      summary: "Изменить роль пользователя"
+      description: "Назначает пользователю новую роль (ADMIN, EMPLOYEE, CLIENT). Требует прав администратора."
+      operationId: "setUserRole"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID пользователя"
+          required: true
+          schema:
+            type: "integer"
+            example: 304
+        - name: "role"
+          in: "query"
+          description: "Новая роль пользователя"
+          required: false
+          schema:
+            type: "string"
+            example: "EMPLOYEE"
+      responses:
+        "200":
+          description: "Роль успешно изменена"
+        "400":
+          description: "Некорректный запрос (например, неверное название роли)"
+        "401":
+          description: "Необходима авторизация"
+        "500":
+          description: "Внутренняя ошибка сервера"
+components:
+  schemas:
+    BaseResponse:
+      title: "Базовый ответ"
+      description: "Стандартная модель ответа, используемая для простых операций."
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+          description: "Указывает на успешность выполнения операции."
+          example: true
+        message:
+          type: "string"
+          description: "Сообщение, описывающее результат операции (например, текст ошибки)."
+          example: "Операция выполнена успешно"
+      required:
+        - "success"
+        - "message"
+    UserModel:
+      title: "Модель пользователя"
+      description: "Представляет пользователя системы."
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+          description: "Уникальный идентификатор пользователя."
+          example: 1
+        firstName:
+          type: "string"
+          description: "Имя пользователя."
+          example: "Иван"
+        lastName:
+          type: "string"
+          description: "Фамилия пользователя."
+          example: "Иванов"
+        email:
+          type: "string"
+          description: "Адрес электронной почты (используется как логин)."
+          example: "ivan.ivanov@example.com"
+        phoneNumber:
+          type: "string"
+          description: "Контактный номер телефона."
+          example: "+79991234567"
+        password:
+          type: "string"
+          description: "Хэш пароля пользователя."
+        role:
+          type: "string"
+          description: "Роль пользователя в системе."
+          enum:
+            - "ADMIN"
+            - "EMPLOYEE"
+            - "CLIENT"
+          example: "CLIENT"
+        isActive:
+          type: "boolean"
+          description: "Флаг, указывающий, активна ли учетная запись."
+          example: true
+      required:
+        - "id"
+        - "firstName"
+        - "lastName"
+        - "email"
+        - "phoneNumber"
+        - "password"
+        - "role"
+        - "isActive"
+    OrderHistoryModel:
+      title: "Модель истории заказа"
+      description: "Представляет одну запись в истории заказа."
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+          description: "Уникальный идентификатор записи истории."
+        orderId:
+          type: "integer"
+          format: "int32"
+          description: "ID заказа, к которому относится эта запись."
+        employee:
+          description: "Сотрудник, внесший изменение."
+          $ref: "#/components/schemas/UserModel"
+        status:
+          type: "string"
+          nullable: true
+          description: "Новый статус заказа (если был изменен)."
+          example: "В печати"
+        comment:
+          type: "string"
+          description: "Комментарий к изменению."
+          example: "Начата печать основной детали."
+        createdAt:
+          type: "string"
+          format: "date-time"
+          description: "Дата и время создания записи."
+      required:
+        - "id"
+        - "orderId"
+        - "employee"
+        - "comment"
+        - "createdAt"
+    CreateOrderHistoryRequest:
+      title: "Запрос на создание записи в истории"
+      description: "Данные для добавления новой записи в историю заказа."
+      type: "object"
+      properties:
+        status:
+          type: "string"
+          nullable: true
+          description: "Новый статус заказа (опционально)."
+          example: "Завершено"
+        comment:
+          type: "string"
+          description: "Комментарий."
+          example: "Печать завершена, заказ готов к выдаче."
+      required:
+        - "comment"
+    FilamentTypeModel:
+      title: "Модель типа филамента"
+      description: "Представляет тип материала для печати (например, PLA, ABS, PETG)."
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+          description: "Уникальный идентификатор типа."
+        name:
+          type: "string"
+          description: "Название типа."
+          example: "PLA"
+        description:
+          type: "string"
+          description: "Описание типа и его свойств."
+          example: "Биоразлагаемый и простой в печати пластик."
+      required:
+        - "id"
+        - "name"
+        - "description"
+    FilamentModel:
+      title: "Модель филамента"
+      description: "Представляет конкретный вид филамента (материал, цвет)."
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+          description: "Уникальный идентификатор филамента."
+        color:
+          type: "string"
+          description: "Название цвета."
+          example: "Красный"
+        type:
+          description: "Тип филамента."
+          $ref: "#/components/schemas/FilamentTypeModel"
+        pricePerGram:
+          type: "number"
+          format: "double"
+          description: "Цена за один грамм материала."
+          example: 5.5
+        residue:
+          type: "integer"
+          format: "int32"
+          description: "Остаток материала в граммах."
+          example: 850
+        hexColor:
+          type: "string"
+          description: "Цвет в формате HEX."
+          example: "#FF0000"
+      required:
+        - "id"
+        - "color"
+        - "type"
+        - "pricePerGram"
+        - "residue"
+        - "hexColor"
+    CartModel:
+      title: "Модель товара в корзине"
+      description: "Представляет один товар в корзине пользователя."
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+          description: "Уникальный идентификатор товара в корзине."
+        user:
+          description: "Пользователь, которому принадлежит корзина."
+          $ref: "#/components/schemas/UserModel"
+        filament:
+          description: "Выбранный для печати филамент."
+          nullable: true
+          $ref: "#/components/schemas/FilamentModel"
+        filePath:
+          type: "string"
+          description: "Путь к файлу 3D-модели."
+          example: "/uploads/models/xyz-calibration-cube.stl"
+        weight:
+          type: "number"
+          format: "double"
+          description: "Расчетный вес модели в граммах."
+          example: 25.5
+        estimatedPrice:
+          type: "number"
+          format: "double"
+          description: "Примерная стоимость печати."
+          example: 140.25
+        comment:
+          type: "string"
+          nullable: true
+          description: "Комментарий пользователя к товару."
+          example: "Напечатать с заполнением 20%"
+        createdAt:
+          type: "string"
+          format: "date-time"
+          description: "Дата и время добавления в корзину."
+      required:
+        - "id"
+        - "user"
+        - "filePath"
+        - "weight"
+        - "estimatedPrice"
+        - "createdAt"
+    CreateCartItemRequest:
+      title: "Запрос на добавление в корзину"
+      description: "Данные для создания нового товара в корзине."
+      type: "object"
+      properties:
+        filamentId:
+          type: "integer"
+          format: "int32"
+          nullable: true
+          description: "ID выбранного филамента."
+          example: 10
+        filePath:
+          type: "string"
+          description: "Путь к файлу модели."
+          example: "/uploads/models/new_model.stl"
+        weight:
+          type: "number"
+          format: "double"
+          description: "Расчетный вес в граммах."
+          example: 150
+        estimatedPrice:
+          type: "number"
+          format: "double"
+          description: "Примерная стоимость."
+          example: 825
+        comment:
+          type: "string"
+          nullable: true
+          description: "Комментарий."
+          example: "Нужна высокая точность"
+      required:
+        - "filePath"
+        - "weight"
+        - "estimatedPrice"
+    UpdateCartItemRequest:
+      title: "Запрос на обновление товара в корзине"
+      description: "Данные для обновления товара в корзине."
+      type: "object"
+      properties:
+        filamentId:
+          type: "integer"
+          format: "int32"
+          nullable: true
+          description: "Новый ID филамента."
+          example: 11
+        filePath:
+          type: "string"
+          description: "Путь к файлу модели."
+          example: "/uploads/models/new_model_v2.stl"
+        weight:
+          type: "number"
+          format: "double"
+          description: "Вес в граммах."
+          example: 155
+        estimatedPrice:
+          type: "number"
+          format: "double"
+          description: "Стоимость."
+          example: 852.5
+        comment:
+          type: "string"
+          nullable: true
+          description: "Комментарий."
+          example: "Изменен на PETG пластик"
+      required:
+        - "filePath"
+        - "weight"
+        - "estimatedPrice"
+    CreateFilamentRequest:
+      title: "Запрос на создание филамента"
+      description: "Данные для создания нового филамента."
+      type: "object"
+      properties:
+        color:
+          type: "string"
+          description: "Название цвета."
+          example: "Синий"
+        typeId:
+          type: "integer"
+          format: "int32"
+          description: "ID типа филамента."
+          example: 2
+        pricePerGram:
+          type: "number"
+          format: "double"
+          description: "Цена за грамм."
+          example: 6.0
+        residue:
+          type: "integer"
+          format: "int32"
+          description: "Начальный остаток в граммах."
+          example: 1000
+        hexColor:
+          type: "string"
+          description: "Цвет в HEX."
+          example: "#0000FF"
+      required:
+        - "color"
+        - "typeId"
+        - "pricePerGram"
+        - "residue"
+        - "hexColor"
+    UpdateFilamentRequest:
+      title: "Запрос на обновление филамента"
+      description: "Данные для обновления филамента."
+      type: "object"
+      properties:
+        color:
+          type: "string"
+          example: "Темно-синий"
+        typeId:
+          type: "integer"
+          format: "int32"
+          example: 2
+        pricePerGram:
+          type: "number"
+          format: "double"
+          example: 6.2
+        residue:
+          type: "integer"
+          format: "int32"
+          example: 750
+        hexColor:
+          type: "string"
+          example: "#00008B"
+      required:
+        - "color"
+        - "typeId"
+        - "pricePerGram"
+        - "residue"
+        - "hexColor"
+    CreateFilamentTypeRequest:
+      title: "Запрос на создание типа филамента"
+      description: "Данные для создания нового типа филамента."
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          example: "PETG"
+        description:
+          type: "string"
+          example: "Прочный и термостойкий материал."
+      required:
+        - "name"
+        - "description"
+    UpdateFilamentTypeRequest:
+      title: "Запрос на обновление типа филамента"
+      description: "Данные для обновления типа филамента."
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          example: "PETG+"
+        description:
+          type: "string"
+          example: "Прочный и термостойкий материал с улучшенными свойствами."
+      required:
+        - "name"
+        - "description"
+    OrderModel:
+      title: "Модель заказа"
+      description: "Представляет заказ на печать."
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+          description: "Уникальный идентификатор заказа."
+        customer:
+          description: "Клиент, сделавший заказ."
+          $ref: "#/components/schemas/UserModel"
+        employee:
+          description: "Сотрудник, ответственный за выполнение заказа."
+          nullable: true
+          $ref: "#/components/schemas/UserModel"
+        status:
+          type: "string"
+          description: "Текущий статус заказа."
+          example: "В обработке"
+        totalPrice:
+          type: "number"
+          format: "double"
+          description: "Итоговая стоимость заказа."
+          example: 1500.00
+        createdAt:
+          type: "string"
+          format: "date-time"
+          description: "Дата и время создания заказа."
+        completedAt:
+          type: "string"
+          format: "date-time"
+          nullable: true
+          description: "Дата и время завершения заказа."
+        comment:
+          type: "string"
+          nullable: true
+          description: "Комментарий к заказу."
+          example: "Срочный заказ."
+      required:
+        - "id"
+        - "customer"
+        - "status"
+        - "totalPrice"
+        - "createdAt"
+    CreateOrderRequest:
+      title: "Запрос на создание заказа"
+      description: "Данные для создания нового заказа (обычно на основе корзины)."
+      type: "object"
+      properties:
+        comment:
+          type: "string"
+          nullable: true
+          description: "Комментарий клиента к заказу."
+          example: "Пожалуйста, упакуйте понадежнее."
+        totalPrice:
+          type: "number"
+          format: "double"
+          description: "Общая стоимость всех товаров в корзине."
+          example: 2500.75
+        status:
+          type: "string"
+          description: "Начальный статус заказа."
+          default: "pending"
+          example: "pending"
+      required:
+        - "totalPrice"
+        - "status"
+    UpdateOrderRequest:
+      title: "Запрос на обновление заказа"
+      description: "Данные для обновления заказа. Используется сотрудниками/администраторами."
+      type: "object"
+      properties:
+        employeeId:
+          type: "integer"
+          format: "int32"
+          nullable: true
+          description: "ID сотрудника, назначенного на заказ."
+          example: 5
+        status:
+          type: "string"
+          description: "Новый статус заказа."
+          example: "Готов к выдаче"
+        totalPrice:
+          type: "number"
+          format: "double"
+          description: "Скорректированная общая стоимость."
+          example: 2510.00
+        comment:
+          type: "string"
+          nullable: true
+          description: "Внутренний комментарий сотрудника."
+          example: "Сложная печать, потребовалось больше времени."
+      required:
+        - "status"
+        - "totalPrice"
+    PrinterModel:
+      title: "Модель принтера"
+      description: "Представляет 3D-принтер."
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+          description: "Уникальный идентификатор принтера."
+        name:
+          type: "string"
+          description: "Название модели принтера."
+          example: "Prusa MK3S+"
+        isMulticolor:
+          type: "boolean"
+          description: "Поддерживает ли принтер многоцветную печать."
+          example: false
+        isActive:
+          type: "boolean"
+          description: "Активен ли принтер в данный момент."
+          example: true
+        description:
+          type: "string"
+          nullable: true
+          description: "Описание или заметки о принтере."
+          example: "Принтер №1, откалиброван 20.10.2025"
+      required:
+        - "id"
+        - "name"
+        - "isMulticolor"
+        - "isActive"
+    RegisterRequest:
+      title: "Запрос на регистрацию"
+      description: "Данные, необходимые для регистрации нового пользователя."
+      type: "object"
+      properties:
+        email:
+          type: "string"
+          example: "new.user@example.com"
+        password:
+          type: "string"
+          example: "Str0ngPa$$w0rd"
+        firstName:
+          type: "string"
+          example: "Петр"
+        lastName:
+          type: "string"
+          example: "Петров"
+        phoneNumber:
+          type: "string"
+          example: "+79167654321"
+      required:
+        - "email"
+        - "password"
+        - "firstName"
+        - "lastName"
+        - "phoneNumber"
+    UpdateUserRequest:
+      title: "Запрос на обновление пользователя"
+      description: "Данные для обновления информации о пользователе."
+      type: "object"
+      properties:
+        firstName:
+          type: "string"
+          example: "Иван"
+        lastName:
+          type: "string"
+          example: "Иванов"
+        email:
+          type: "string"
+          example: "ivan.ivanov@example.com"
+        phoneNumber:
+          type: "string"
+          example: "+79991234567"
+        password:
+          type: "string"
+          description: "Новый пароль (если нужно изменить)."
+          example: "NewSecurePa$$123"
+        role:
+          type: "string"
+          enum:
+            - "ADMIN"
+            - "EMPLOYEE"
+            - "CLIENT"
+          example: "CLIENT"
+        isActive:
+          type: "boolean"
+          example: true
+      required:
+        - "firstName"
+        - "lastName"
+        - "email"
+        - "phoneNumber"
+        - "password"
+        - "role"
+        - "isActive"
+    Unit:
+      title: "Пустой ответ"
+      description: "Используется для операций, которые не возвращают тело ответа."
+      type: "object"
+      properties: { }

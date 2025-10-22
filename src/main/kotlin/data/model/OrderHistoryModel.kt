@@ -1,6 +1,5 @@
 package data.model
 
-import io.ktor.server.auth.*
 import kotlinx.serialization.Serializable
 import utils.LocalDateTimeSerializer
 import java.time.LocalDateTime
@@ -14,4 +13,4 @@ data class OrderHistoryModel(
     val comment: String,
     @Serializable(with = LocalDateTimeSerializer::class)
     val createdAt: LocalDateTime
-) : Principal
+)

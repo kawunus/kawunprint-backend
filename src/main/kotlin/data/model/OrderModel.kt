@@ -1,6 +1,5 @@
 package data.model
 
-import io.ktor.server.auth.*
 import kotlinx.serialization.Serializable
 import utils.LocalDateTimeSerializer
 import java.time.LocalDateTime
@@ -17,4 +16,4 @@ data class OrderModel(
     @Serializable(with = LocalDateTimeSerializer::class)
     val completedAt: LocalDateTime?,
     val comment: String?,
-) : Principal
+)
