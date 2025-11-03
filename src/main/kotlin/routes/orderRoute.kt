@@ -1,4 +1,3 @@
-// path: su/kawunprint/routes/OrderRoute.kt
 package routes
 
 import data.model.OrderModel
@@ -24,32 +23,19 @@ fun Route.orderRoute() {
     authenticate("jwt") {
         route("/api/v1/orders") {
             get {
-                val principal = call.principal<JWTPrincipal>()!!
-                val userRole = RoleModel.valueOf(principal.payload.getClaim("role").asString())
-                val userId = principal.payload.getClaim("id").asInt()
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
 
-                val orders = if (userRole == RoleModel.ADMIN || userRole == RoleModel.EMPLOYEE) {
-                    orderUseCase.getAllOrders()
-                } else {
-                    orderUseCase.getOrdersByCustomerId(userId)
-                }
+                val orders = orderUseCase.getAllOrders()
                 call.respond(HttpStatusCode.OK, orders)
             }
 
             get("/{id}") {
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
                 val id = call.parameters["id"]?.toIntOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
 
-                val principal = call.principal<JWTPrincipal>()!!
-                val userRole = RoleModel.valueOf(principal.payload.getClaim("role").asString())
-                val userId = principal.payload.getClaim("id").asInt()
-
                 val order = orderUseCase.getOrderById(id)
                     ?: return@get call.respond(HttpStatusCode.NotFound)
-
-                if (userRole == RoleModel.CLIENT && order.customer.id != userId) {
-                    return@get call.respond(HttpStatusCode.Forbidden)
-                }
 
                 call.respond(HttpStatusCode.OK, order)
             }

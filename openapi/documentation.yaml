@@ -1,7 +1,7 @@
 openapi: "3.0.3"
 info:
-  title: "Kawunprint API"
-  description: "Это OpenAPI спецификация для API студии 3D-печати 'Kawunprint'. API позволяет клиентам делать заказы на 
+  title: "KawunPrint API"
+  description: "Это OpenAPI спецификация для API студии 3D-печати 'KawunPrint'. API позволяет клиентам делать заказы на 
   печать, управлять корзиной, а сотрудникам и администраторам управлять заказами, филаментами и принтерами."
   version: "1.0.0"
 servers:

@@ -2,6 +2,7 @@ package su.kawunprint
 
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import su.kawunprint.data.model.responses.BaseResponse
@@ -27,8 +28,21 @@ fun Application.module() {
         }
     }
     configureDI()
-    configureSecurity()
+    install(CORS) {
+        anyHost()
+        allowMethod(HttpMethod.Options)
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Delete)
+        allowHeader(HttpHeaders.ContentType)
+        allowHeader(HttpHeaders.Authorization)
+        allowHeader(HttpHeaders.Accept)
+        allowCredentials = true
+    }
     configureSerialization()
+
+    configureSecurity()
     configureRouting()
     configureMonitoring()
 }

@@ -21,21 +21,15 @@ fun Route.orderHistoryRoute() {
     val orderUseCase: OrderUseCase by inject()
     val userUseCase: UserUseCase by inject()
     authenticate("jwt") {
-        route("/{orderId}/history") {
+        route("/api/v1/orders/{orderId}/history") {
             get {
                 val orderId = call.parameters["orderId"]?.toIntOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
 
-                val principal = call.principal<JWTPrincipal>()!!
-                val userRole = RoleModel.valueOf(principal.payload.getClaim("role").asString())
-                val userId = principal.payload.getClaim("id").asInt()
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
 
-                val order = orderUseCase.getOrderById(orderId)
+                orderUseCase.getOrderById(orderId)
                     ?: return@get call.respond(HttpStatusCode.NotFound, "Order not found")
-
-                if (userRole == RoleModel.CLIENT && order.customer.id != userId) {
-                    return@get call.respond(HttpStatusCode.Forbidden)
-                }
 
                 val history = orderHistoryUseCase.getHistoryForOrder(orderId)
                 call.respond(HttpStatusCode.OK, history)
