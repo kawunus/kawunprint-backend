@@ -1,5 +1,8 @@
 package data.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class PrinterModel(
     val id: Int = 0,
     val name: String,

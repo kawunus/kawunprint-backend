@@ -41,7 +41,7 @@ fun Route.printerRoute() {
             }
 
             post {
-                call.authenticateWithRole(RoleModel.ADMIN)
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
                 val printerRequest = call.receive<PrinterModel>()
                 printerUseCase.createPrinter(printerRequest)
                 call.respond(HttpStatusCode.Created)
@@ -65,7 +65,7 @@ fun Route.printerRoute() {
             }
 
             patch("/{id}/active") {
-                call.authenticateWithRole(RoleModel.ADMIN)
+                call.authenticateWithRole(RoleModel.EMPLOYEE, RoleModel.ADMIN)
                 val id = call.parameters["id"]?.toIntOrNull()
                     ?: return@patch call.respond(HttpStatusCode.BadRequest)
                 val stateParam = call.request.queryParameters["state"]?.toBooleanStrictOrNull()
