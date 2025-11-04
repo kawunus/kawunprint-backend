@@ -17,6 +17,8 @@ class FilamentRepositoryImpl : FilamentRepository {
                 filamentTable[color] = filament.color
                 filamentTable[typeId] = filament.type.id
                 filamentTable[pricePerGram] = filament.pricePerGram
+                filamentTable[residue] = filament.residue
+                filamentTable[hexColor] = filament.hexColor
             }
         }
     }
@@ -43,6 +45,8 @@ class FilamentRepositoryImpl : FilamentRepository {
                 filamentTable[color] = filament.color
                 filamentTable[typeId] = filament.type.id
                 filamentTable[pricePerGram] = filament.pricePerGram
+                filamentTable[residue] = filament.residue
+                filamentTable[hexColor] = filament.hexColor
             }
         }
     }

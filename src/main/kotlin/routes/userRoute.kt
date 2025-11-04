@@ -84,7 +84,7 @@ fun Route.userRoute() {
     authenticate("jwt") {
         route("/api/v1/users") {
             get {
-                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
+                call.authenticateWithRole(RoleModel.ADMIN)
                 try {
                     val users = userUseCase.getAllUsers()
                     call.respond(HttpStatusCode.OK, users)
@@ -95,7 +95,7 @@ fun Route.userRoute() {
             }
 
             get("/{id}") {
-                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
+                call.authenticateWithRole(RoleModel.ADMIN)
                 val id = call.parameters["id"]?.toIntOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
                 val user = userUseCase.getUserById(id)
@@ -117,7 +117,7 @@ fun Route.userRoute() {
             }
 
             post("/{id}") {
-                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
+                call.authenticateWithRole(RoleModel.ADMIN)
                 val id = call.parameters["id"]?.toIntOrNull()
                     ?: return@post call.respond(HttpStatusCode.BadRequest)
                 val request = call.receive<UpdateUserRequest>()
