@@ -25,6 +25,7 @@ class JwtService {
             .withSubject("KawunPrintAuthentication")
             .withIssuer(issuer)
             .withClaim("email", user.email)
+            .withClaim("name", "${user.firstName} ${user.lastName}")
             .withExpiresAt(LocalDateTime.now().plusDays(8).toInstant(ZoneOffset.UTC))
             .sign(algorithm)
     }
