@@ -1,9 +1,6 @@
 package su.kawunprint.di
 
-import domain.usecase.CartUseCase
-import domain.usecase.OrderHistoryUseCase
-import domain.usecase.OrderUseCase
-import domain.usecase.PrinterUseCase
+import domain.usecase.*
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 import su.kawunprint.domain.usecase.FilamentTypeUseCase
@@ -24,4 +21,8 @@ val domainModule = module {
     factoryOf(::OrderUseCase)
 
     factoryOf(::OrderHistoryUseCase)
+
+    factoryOf(::OrderStatusUseCase)
+
+    factoryOf(::PrinterHistoryUseCase)
 }
