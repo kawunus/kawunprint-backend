@@ -42,17 +42,19 @@ fun Route.printerRoute() {
 
             post {
                 call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
+                val employeeId = call.request.headers["X-User-ID"]?.toIntOrNull()
                 val printerRequest = call.receive<PrinterModel>()
-                printerUseCase.createPrinter(printerRequest)
+                printerUseCase.createPrinter(printerRequest, employeeId)
                 call.respond(HttpStatusCode.Created)
             }
 
             put("/{id}") {
-                call.authenticateWithRole(RoleModel.ADMIN)
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
+                val employeeId = call.request.headers["X-User-ID"]?.toIntOrNull()
                 val id = call.parameters["id"]?.toIntOrNull()
                     ?: return@put call.respond(HttpStatusCode.BadRequest)
                 val request = call.receive<PrinterModel>()
-                printerUseCase.updatePrinter(request.copy(id = id))
+                printerUseCase.updatePrinter(request.copy(id = id), employeeId)
                 call.respond(HttpStatusCode.OK)
             }
 
@@ -66,12 +68,13 @@ fun Route.printerRoute() {
 
             patch("/{id}/active") {
                 call.authenticateWithRole(RoleModel.EMPLOYEE, RoleModel.ADMIN)
+                val employeeId = call.request.headers["X-User-ID"]?.toIntOrNull()
                 val id = call.parameters["id"]?.toIntOrNull()
                     ?: return@patch call.respond(HttpStatusCode.BadRequest)
                 val stateParam = call.request.queryParameters["state"]?.toBooleanStrictOrNull()
                     ?: return@patch call.respond(HttpStatusCode.BadRequest, "Missing or invalid 'state' query param")
 
-                printerUseCase.updatePrinterActiveState(id, stateParam)
+                printerUseCase.updatePrinterActiveState(id, stateParam, employeeId)
                 call.respond(HttpStatusCode.OK, "Printer #$id active = $stateParam")
             }
         }

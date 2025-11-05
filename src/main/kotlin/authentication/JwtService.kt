@@ -26,6 +26,8 @@ class JwtService {
             .withIssuer(issuer)
             .withClaim("email", user.email)
             .withClaim("name", "${user.firstName} ${user.lastName}")
+            .withClaim("role", user.role.name)
+            .withClaim("id", user.id)
             .withExpiresAt(LocalDateTime.now().plusDays(8).toInstant(ZoneOffset.UTC))
             .sign(algorithm)
     }
