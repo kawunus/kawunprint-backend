@@ -9,7 +9,7 @@ data class OrderModel(
     val id: Int = 0,
     val customer: UserModel,
     val employee: UserModel?,
-    val status: String,
+    val statusId: Int,
     val totalPrice: Double,
     @Serializable(with = LocalDateTimeSerializer::class)
     val createdAt: LocalDateTime,

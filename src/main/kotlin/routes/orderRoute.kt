@@ -1,12 +1,12 @@
 package routes
 
 import data.model.OrderModel
+import data.model.UserModel
 import data.model.requests.order.CreateOrderRequest
 import data.model.requests.order.UpdateOrderRequest
 import domain.usecase.OrderUseCase
 import io.ktor.http.*
 import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -41,8 +41,9 @@ fun Route.orderRoute() {
             }
 
             post {
-                val principal = call.principal<JWTPrincipal>()!!
-                val userId = principal.payload.getClaim("id").asInt()
+                // Use UserModel principal populated by JWT validate
+                val principal = call.principal<UserModel>()!!
+                val userId = principal.id
                 val customer = userUseCase.getUserById(userId) ?: return@post call.respond(HttpStatusCode.Unauthorized)
 
                 val body = call.receive<CreateOrderRequest>()
@@ -50,7 +51,7 @@ fun Route.orderRoute() {
                 val order = OrderModel(
                     customer = customer,
                     employee = null,
-                    status = body.status,
+                    statusId = body.statusId,
                     totalPrice = body.totalPrice,
                     createdAt = LocalDateTime.now(),
                     completedAt = null,
@@ -81,14 +82,12 @@ fun Route.orderRoute() {
                     return@put call.respond(HttpStatusCode.BadRequest, "Invalid employee ID")
                 }
 
-                val isCompleted = body.status.equals("completed", ignoreCase = true)
-
                 val updatedOrder = existingOrder.copy(
                     employee = employee,
-                    status = body.status,
+                    statusId = body.statusId,
                     totalPrice = body.totalPrice,
                     comment = body.comment,
-                    completedAt = if (isCompleted && existingOrder.completedAt == null) LocalDateTime.now() else existingOrder.completedAt
+                    completedAt = existingOrder.completedAt
                 )
 
                 orderUseCase.updateOrder(updatedOrder)

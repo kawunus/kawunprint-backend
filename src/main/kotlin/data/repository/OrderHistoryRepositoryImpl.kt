@@ -19,7 +19,7 @@ class OrderHistoryRepositoryImpl : OrderHistoryRepository {
             OrderHistoryTable.insert {
                 it[orderId] = entry.orderId
                 it[employeeId] = entry.employee.id
-                it[status] = entry.status
+                it[statusId] = entry.statusId
                 it[comment] = entry.comment
                 it[createdAt] = LocalDateTime.now()
             }.resultedValues?.firstOrNull()?.get(OrderHistoryTable.id)
@@ -60,7 +60,7 @@ class OrderHistoryRepositoryImpl : OrderHistoryRepository {
             id = row[OrderHistoryTable.id],
             orderId = row[OrderHistoryTable.orderId],
             employee = employee,
-            status = row[OrderHistoryTable.status],
+            statusId = row[OrderHistoryTable.statusId],
             comment = row[OrderHistoryTable.comment],
             createdAt = row[OrderHistoryTable.createdAt]
         )

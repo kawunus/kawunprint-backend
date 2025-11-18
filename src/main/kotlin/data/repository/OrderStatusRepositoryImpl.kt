@@ -6,7 +6,6 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import su.kawunprint.data.model.tables.OrderStatusTable
 import su.kawunprint.plugins.Databases.dbQuery
-import java.time.LocalDateTime
 
 class OrderStatusRepositoryImpl : OrderStatusRepository {
 
@@ -31,7 +30,6 @@ class OrderStatusRepositoryImpl : OrderStatusRepository {
         val key = dbQuery {
             OrderStatusTable.insert {
                 it[description] = status.description
-                it[createdAt] = LocalDateTime.now()
             }.resultedValues?.firstOrNull()?.get(OrderStatusTable.id)
         }
         return key?.let { getById(it) }
@@ -54,6 +52,5 @@ class OrderStatusRepositoryImpl : OrderStatusRepository {
     private fun rowToModel(row: ResultRow) = OrderStatusModel(
         id = row[OrderStatusTable.id],
         description = row[OrderStatusTable.description],
-        createdAt = row[OrderStatusTable.createdAt]
     )
 }

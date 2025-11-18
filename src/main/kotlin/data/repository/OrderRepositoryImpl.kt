@@ -18,7 +18,7 @@ class OrderRepositoryImpl : OrderRepository {
             OrderTable.insert {
                 it[customerId] = order.customer.id
                 it[employeeId] = order.employee?.id
-                it[status] = order.status
+                it[statusId] = order.statusId
                 it[totalPrice] = order.totalPrice
                 it[createdAt] = LocalDateTime.now()
                 it[completedAt] = order.completedAt
@@ -72,7 +72,7 @@ class OrderRepositoryImpl : OrderRepository {
         dbQuery {
             OrderTable.update({ OrderTable.id eq order.id }) {
                 it[employeeId] = order.employee?.id
-                it[status] = order.status
+                it[statusId] = order.statusId
                 it[totalPrice] = order.totalPrice
                 it[completedAt] = order.completedAt
                 it[comment] = order.comment
@@ -113,7 +113,7 @@ class OrderRepositoryImpl : OrderRepository {
             id = row[OrderTable.id],
             customer = customerModel,
             employee = employeeModel,
-            status = row[OrderTable.status],
+            statusId = row[OrderTable.statusId],
             totalPrice = row[OrderTable.totalPrice],
             createdAt = row[OrderTable.createdAt],
             completedAt = row[OrderTable.completedAt],

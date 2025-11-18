@@ -1,12 +1,12 @@
 package routes
 
 import data.model.OrderHistoryModel
+import data.model.UserModel
 import data.model.requests.order.history.CreateOrderHistoryRequest
 import domain.usecase.OrderHistoryUseCase
 import domain.usecase.OrderUseCase
 import io.ktor.http.*
 import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -41,8 +41,9 @@ fun Route.orderHistoryRoute() {
                 val orderId = call.parameters["orderId"]?.toIntOrNull()
                     ?: return@post call.respond(HttpStatusCode.BadRequest)
 
-                val principal = call.principal<JWTPrincipal>()!!
-                val employeeId = principal.payload.getClaim("id").asInt()
+                // JWT validate returns a UserModel as principal, use that type here
+                val principal = call.principal<UserModel>()!!
+                val employeeId = principal.id
                 val employee =
                     userUseCase.getUserById(employeeId) ?: return@post call.respond(HttpStatusCode.Unauthorized)
 
@@ -54,18 +55,17 @@ fun Route.orderHistoryRoute() {
                 val historyEntry = OrderHistoryModel(
                     orderId = orderId,
                     employee = employee,
-                    status = body.status,
+                    statusId = body.statusId,
                     comment = body.comment,
                     createdAt = LocalDateTime.now()
                 )
 
                 val createdEntry = orderHistoryUseCase.addHistoryEntry(historyEntry)
 
-                if (createdEntry != null && !body.status.isNullOrBlank()) {
-                    val isCompleted = body.status.equals("completed", ignoreCase = true)
+                if (createdEntry != null) {
                     val updatedOrder = order.copy(
-                        status = body.status,
-                        completedAt = if (isCompleted && order.completedAt == null) LocalDateTime.now() else order.completedAt
+                        statusId = body.statusId,
+                        completedAt = order.completedAt
                     )
                     orderUseCase.updateOrder(updatedOrder)
                 }

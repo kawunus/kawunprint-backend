@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class CreateOrderRequest(
     val comment: String?,
     val totalPrice: Double,
-    val status: String = "pending"
+    val statusId: Int
 )

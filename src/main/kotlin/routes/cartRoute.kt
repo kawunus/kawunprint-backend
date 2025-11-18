@@ -1,12 +1,12 @@
 package routes
 
 import data.model.CartModel
+import data.model.UserModel
 import data.model.requests.cart.CreateCartItemRequest
 import data.model.requests.cart.UpdateCartItemRequest
 import domain.usecase.CartUseCase
 import io.ktor.http.*
 import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -24,15 +24,15 @@ fun Route.cartRoute() {
         route("/api/v1/cart") {
 
             get {
-                val principal = call.principal<JWTPrincipal>()
-                val userId = principal!!.payload.getClaim("id").asInt()
+                val principal = call.principal<UserModel>()!!
+                val userId = principal.id
                 val cartItems = cartUseCase.getCartItemsByUserId(userId)
                 call.respond(HttpStatusCode.OK, cartItems)
             }
 
             post {
-                val principal = call.principal<JWTPrincipal>()
-                val userId = principal!!.payload.getClaim("id").asInt()
+                val principal = call.principal<UserModel>()!!
+                val userId = principal.id
                 val user = userUseCase.getUserById(userId) ?: return@post call.respond(HttpStatusCode.Unauthorized)
 
                 val body = call.receive<CreateCartItemRequest>()
@@ -64,8 +64,8 @@ fun Route.cartRoute() {
                 val id = call.parameters["id"]?.toIntOrNull()
                     ?: return@put call.respond(HttpStatusCode.BadRequest)
 
-                val principal = call.principal<JWTPrincipal>()
-                val userId = principal!!.payload.getClaim("id").asInt()
+                val principal = call.principal<UserModel>()!!
+                val userId = principal.id
 
                 val existingItem = cartUseCase.getCartItemById(id)
                     ?: return@put call.respond(HttpStatusCode.NotFound)
@@ -97,8 +97,8 @@ fun Route.cartRoute() {
                 val id = call.parameters["id"]?.toIntOrNull()
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
 
-                val principal = call.principal<JWTPrincipal>()
-                val userId = principal!!.payload.getClaim("id").asInt()
+                val principal = call.principal<UserModel>()!!
+                val userId = principal.id
 
                 val existingItem = cartUseCase.getCartItemById(id)
                     ?: return@delete call.respond(HttpStatusCode.NotFound)

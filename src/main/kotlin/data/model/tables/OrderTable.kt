@@ -8,7 +8,7 @@ object OrderTable : Table() {
     val id: Column<Int> = integer("id").autoIncrement()
     val customerId: Column<Int> = integer("customer_id").references(UserTable.id)
     val employeeId: Column<Int?> = integer("employee_id").references(UserTable.id).nullable()
-    val status: Column<String> = varchar("status", 50) // e.g. "in_progress", "completed", etc.
+    val statusId: Column<Int> = integer("status_id").references(OrderStatusTable.id) // связь с OrderStatusTable
     val totalPrice: Column<Double> = double("total_price").default(0.0)
     val createdAt = datetime("created_at")
     val completedAt = datetime("completed_at").nullable()
