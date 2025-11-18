@@ -1,5 +1,6 @@
 package data.model
 
+import io.ktor.server.auth.*
 import kotlinx.serialization.Serializable
 import su.kawunprint.data.model.RoleModel
 
@@ -13,4 +14,4 @@ data class UserModel(
     val password: String,
     val role: RoleModel,
     val isActive: Boolean = false,
-)
+) : Principal

@@ -41,16 +41,26 @@ fun Route.orderRoute() {
             }
 
             post {
-                // Use UserModel principal populated by JWT validate
-                val principal = call.principal<UserModel>()!!
-                val userId = principal.id
-                val customer = userUseCase.getUserById(userId) ?: return@post call.respond(HttpStatusCode.Unauthorized)
+                // Allow admin/employee to create an order for a customer specified in body.
+                // The X-User-Id header (if present) is treated as the acting employee ID for audit only.
+                call.principal<UserModel>()
+                    ?: return@post call.respond(HttpStatusCode.Unauthorized)
+
+                // employeeId for audit can be present in header
+                val employeeId = call.request.headers["X-User-Id"]?.toIntOrNull()
 
                 val body = call.receive<CreateOrderRequest>()
+                val customerId = body.customerId
+                    ?: return@post call.respond(HttpStatusCode.BadRequest, "Missing customerId in request body")
+
+                val customer = userUseCase.getUserById(customerId)
+                    ?: return@post call.respond(HttpStatusCode.BadRequest, "Invalid customerId")
+
+                val employee = employeeId?.let { userUseCase.getUserById(it) }
 
                 val order = OrderModel(
                     customer = customer,
-                    employee = null,
+                    employee = employee,
                     statusId = body.statusId,
                     totalPrice = body.totalPrice,
                     createdAt = LocalDateTime.now(),

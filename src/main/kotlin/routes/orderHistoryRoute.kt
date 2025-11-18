@@ -42,7 +42,7 @@ fun Route.orderHistoryRoute() {
                     ?: return@post call.respond(HttpStatusCode.BadRequest)
 
                 // JWT validate returns a UserModel as principal, use that type here
-                val principal = call.principal<UserModel>()!!
+                val principal = call.principal<UserModel>() ?: return@post call.respond(HttpStatusCode.Unauthorized)
                 val employeeId = principal.id
                 val employee =
                     userUseCase.getUserById(employeeId) ?: return@post call.respond(HttpStatusCode.Unauthorized)

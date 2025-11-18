@@ -24,14 +24,14 @@ fun Route.cartRoute() {
         route("/api/v1/cart") {
 
             get {
-                val principal = call.principal<UserModel>()!!
+                val principal = call.principal<UserModel>() ?: return@get call.respond(HttpStatusCode.Unauthorized)
                 val userId = principal.id
                 val cartItems = cartUseCase.getCartItemsByUserId(userId)
                 call.respond(HttpStatusCode.OK, cartItems)
             }
 
             post {
-                val principal = call.principal<UserModel>()!!
+                val principal = call.principal<UserModel>() ?: return@post call.respond(HttpStatusCode.Unauthorized)
                 val userId = principal.id
                 val user = userUseCase.getUserById(userId) ?: return@post call.respond(HttpStatusCode.Unauthorized)
 
@@ -64,7 +64,7 @@ fun Route.cartRoute() {
                 val id = call.parameters["id"]?.toIntOrNull()
                     ?: return@put call.respond(HttpStatusCode.BadRequest)
 
-                val principal = call.principal<UserModel>()!!
+                val principal = call.principal<UserModel>() ?: return@put call.respond(HttpStatusCode.Unauthorized)
                 val userId = principal.id
 
                 val existingItem = cartUseCase.getCartItemById(id)
@@ -97,7 +97,7 @@ fun Route.cartRoute() {
                 val id = call.parameters["id"]?.toIntOrNull()
                     ?: return@delete call.respond(HttpStatusCode.BadRequest)
 
-                val principal = call.principal<UserModel>()!!
+                val principal = call.principal<UserModel>() ?: return@delete call.respond(HttpStatusCode.Unauthorized)
                 val userId = principal.id
 
                 val existingItem = cartUseCase.getCartItemById(id)
