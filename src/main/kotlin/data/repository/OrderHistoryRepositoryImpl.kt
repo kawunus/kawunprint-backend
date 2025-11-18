@@ -53,6 +53,7 @@ class OrderHistoryRepositoryImpl : OrderHistoryRepository {
             lastName = row[UserTable.lastName],
             password = row[UserTable.password],
             phoneNumber = row[UserTable.phoneNumber],
+            telegramAccount = row[UserTable.telegramAccount],
             role = row[UserTable.role].getRoleByString()
         )
 

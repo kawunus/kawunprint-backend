@@ -15,4 +15,13 @@ interface FilamentRepository {
     suspend fun deleteFilament(filament: FilamentModel)
 
     suspend fun getFilamentById(id: Int): FilamentModel?
+
+    // Consume grams of filament for an order in a single transaction. Returns Pair(updatedOrder, updatedFilament)
+    suspend fun consumeFilamentForOrder(
+        orderId: Int,
+        filamentId: Int,
+        gramsUsed: Int,
+        employeeId: Int?,
+        comment: String?
+    ): Pair<Int, Int>
 }

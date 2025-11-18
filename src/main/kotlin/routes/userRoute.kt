@@ -1,6 +1,7 @@
 package su.kawunprint.routes
 
 import data.model.UserModel
+import data.model.requests.user.UpdateSelfUserRequest
 import data.model.requests.user.UpdateUserRequest
 import io.ktor.http.*
 import io.ktor.server.auth.*
@@ -32,6 +33,7 @@ fun Route.userRoute() {
                 firstName = registerRequest.firstName.trim(),
                 lastName = registerRequest.lastName.trim(),
                 phoneNumber = registerRequest.phoneNumber.trim(),
+                telegramAccount = null,
                 role = RoleModel.CLIENT,
                 isActive = true
             )
@@ -83,6 +85,50 @@ fun Route.userRoute() {
 
     authenticate("jwt") {
         route("/api/v1/users") {
+            // Endpoints for the authenticated user to manage their own profile
+            get("/me") {
+                val principal = call.principal<UserModel>() ?: return@get call.respond(HttpStatusCode.Unauthorized)
+                val user = userUseCase.getUserById(principal.id) ?: return@get call.respond(HttpStatusCode.NotFound)
+                call.respond(HttpStatusCode.OK, user)
+            }
+
+            put("/me") {
+                val principal = call.principal<UserModel>() ?: return@put call.respond(HttpStatusCode.Unauthorized)
+                val request = call.receive<UpdateSelfUserRequest>()
+
+                try {
+                    val updated = userUseCase.updateUser(
+                        UserModel(
+                            id = principal.id,
+                            firstName = request.firstName,
+                            lastName = request.lastName,
+                            email = request.email,
+                            phoneNumber = request.phoneNumber,
+                            telegramAccount = principal.telegramAccount,
+                            password = hashFunction(request.password),
+                            role = principal.role,
+                            isActive = principal.isActive
+                        )
+                    )
+                    call.respond(HttpStatusCode.OK, updated)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    call.respond(HttpStatusCode.InternalServerError)
+                }
+            }
+
+            delete("/me") {
+                val principal = call.principal<UserModel>() ?: return@delete call.respond(HttpStatusCode.Unauthorized)
+
+                try {
+                    userUseCase.deleteUserById(principal.id)
+                    call.respond(HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    call.respond(HttpStatusCode.InternalServerError)
+                }
+            }
+
             get {
                 call.authenticateWithRole(RoleModel.ADMIN)
                 try {
@@ -130,6 +176,7 @@ fun Route.userRoute() {
                             lastName = request.lastName,
                             email = request.email,
                             phoneNumber = request.phoneNumber,
+                            telegramAccount = null,
                             password = hashFunction(request.password),
                             role = request.role,
                             isActive = request.isActive

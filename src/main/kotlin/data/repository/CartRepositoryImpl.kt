@@ -81,6 +81,7 @@ class CartRepositoryImpl : CartRepository {
             email = row[UserTable.email],
             phoneNumber = row[UserTable.phoneNumber],
             password = row[UserTable.password],
+            telegramAccount = row[UserTable.telegramAccount],
             role = row[UserTable.role].getRoleByString()
         )
 

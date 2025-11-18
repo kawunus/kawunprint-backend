@@ -12,6 +12,7 @@ data class UserModel(
     val email: String,
     val phoneNumber: String,
     val password: String,
+    val telegramAccount: String? = null,
     val role: RoleModel,
     val isActive: Boolean = false,
 ) : Principal

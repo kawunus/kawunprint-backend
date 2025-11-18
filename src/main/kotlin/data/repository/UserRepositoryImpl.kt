@@ -30,6 +30,7 @@ class UserRepositoryImpl : UserRepository {
                 table[UserTable.firstName] = user.firstName
                 table[UserTable.lastName] = user.lastName
                 table[UserTable.phoneNumber] = user.phoneNumber
+                table[UserTable.telegramAccount] = user.telegramAccount
                 table[UserTable.role] = user.role.getStringByRole()
                 table[UserTable.isActive] = user.isActive
             }
@@ -43,6 +44,7 @@ class UserRepositoryImpl : UserRepository {
             it[firstName] = user.firstName
             it[lastName] = user.lastName
             it[phoneNumber] = user.phoneNumber
+            it[UserTable.telegramAccount] = user.telegramAccount
             it[role] = user.role.getStringByRole()
             it[isActive] = user.isActive
         }
@@ -93,6 +95,7 @@ class UserRepositoryImpl : UserRepository {
             lastName = row[UserTable.lastName],
             firstName = row[UserTable.firstName],
             phoneNumber = row[UserTable.phoneNumber],
+            telegramAccount = row[UserTable.telegramAccount],
             isActive = row[UserTable.isActive],
             role = row[UserTable.role].getRoleByString()
         )

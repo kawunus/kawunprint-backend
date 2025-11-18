@@ -94,6 +94,7 @@ class OrderRepositoryImpl : OrderRepository {
             password = row[customer[UserTable.password]],
             phoneNumber = row[customer[UserTable.phoneNumber]],
             email = row[customer[UserTable.email]],
+            telegramAccount = row[customer[UserTable.telegramAccount]],
             role = row[customer[UserTable.role]].getRoleByString()
         )
 
@@ -105,6 +106,7 @@ class OrderRepositoryImpl : OrderRepository {
                 password = row[employee[UserTable.password]],
                 phoneNumber = row[employee[UserTable.phoneNumber]],
                 email = row[employee[UserTable.email]],
+                telegramAccount = row[employee[UserTable.telegramAccount]],
                 role = row[employee[UserTable.role]].getRoleByString()
             )
         } else null
