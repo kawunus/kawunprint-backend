@@ -36,7 +36,7 @@ fun Route.userRoute() {
                 phoneNumber = registerRequest.phoneNumber.trim(),
                 telegramAccount = null,
                 role = RoleModel.CLIENT,
-                isActive = true
+                isActive = false
             )
 
             userUseCase.createUser(user)

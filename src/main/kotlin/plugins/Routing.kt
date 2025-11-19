@@ -22,11 +22,12 @@ fun Application.configureRouting() {
         printerHistoryRoute()
         orderFileRoute()
         adminFileRoute()
+        emailVerificationRoute()
 
         staticFiles("/uploads", java.io.File("./uploads"))
 
         swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml") {
-            version = "4.15.5" // версия Swagger UI
+            version = "4.15.5"
         }
     }
 }
