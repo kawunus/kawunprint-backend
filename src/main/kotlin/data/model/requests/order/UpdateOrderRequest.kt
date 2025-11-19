@@ -8,4 +8,5 @@ data class UpdateOrderRequest(
     val statusId: Int,
     val totalPrice: Double,
     val comment: String?,
+    val completedAt: String? = null
 )

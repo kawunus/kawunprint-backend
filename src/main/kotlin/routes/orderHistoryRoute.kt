@@ -26,10 +26,27 @@ fun Route.orderHistoryRoute() {
                 val orderId = call.parameters["orderId"]?.toIntOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
 
-                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST)
+                val principal = call.principal<UserModel>()
+                    ?: return@get call.respond(HttpStatusCode.Unauthorized)
 
-                orderUseCase.getOrderById(orderId)
+                val order = orderUseCase.getOrderById(orderId)
                     ?: return@get call.respond(HttpStatusCode.NotFound, "Order not found")
+
+                when (principal.role) {
+                    RoleModel.CLIENT -> {
+                        if (order.customer.id != principal.id) {
+                            return@get call.respond(
+                                HttpStatusCode.Forbidden,
+                                "You can only view history of your own orders"
+                            )
+                        }
+                    }
+
+                    RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST -> {
+                    }
+
+                    else -> return@get call.respond(HttpStatusCode.Forbidden)
+                }
 
                 val history = orderHistoryUseCase.getHistoryForOrder(orderId)
                 call.respond(HttpStatusCode.OK, history)
