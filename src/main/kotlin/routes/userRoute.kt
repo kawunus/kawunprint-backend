@@ -119,7 +119,15 @@ fun Route.userRoute() {
                         return@put call.respond(HttpStatusCode.Unauthorized, "Неверный пароль")
                     }
 
-                    // 3. Determine password to use (old or new)
+                    // 3. Check if email is being changed and if new email is already taken
+                    if (request.email.trim().lowercase() != currentUser.email) {
+                        val existingUser = userUseCase.getUserByEmail(request.email.trim().lowercase())
+                        if (existingUser != null && existingUser.id != principal.id) {
+                            return@put call.respond(HttpStatusCode.Conflict, "Этот email уже зарегистрирован")
+                        }
+                    }
+
+                    // 4. Determine password to use (old or new)
                     val passwordToSet = if (!request.newPassword.isNullOrBlank()) {
                         hashFunction(request.newPassword)
                     } else {
