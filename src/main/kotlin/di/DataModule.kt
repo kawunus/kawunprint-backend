@@ -28,8 +28,6 @@ val dataModule = module {
 
     singleOf(::PrinterRepositoryImpl) bind PrinterRepository::class
 
-    singleOf(::CartRepositoryImpl) bind CartRepository::class
-
     singleOf(::OrderRepositoryImpl) bind OrderRepository::class
 
     singleOf(::OrderHistoryRepositoryImpl) bind OrderHistoryRepository::class

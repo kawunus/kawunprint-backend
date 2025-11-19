@@ -11,8 +11,8 @@ class OrderFileUseCase(
     private val firebaseStorageService: FirebaseStorageService
 ) {
     companion object {
-        const val MAX_FILES_PER_ORDER = 10
-        const val MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB
+        const val MAX_FILES_PER_ORDER = 5
+        const val MAX_FILE_SIZE = 20 * 1024 * 1024 // 20MB
     }
 
     suspend fun uploadFile(

@@ -47,6 +47,12 @@ class OrderFileRepositoryImpl : OrderFileRepository {
         }
     }
 
+    override suspend fun deleteFilesByOrderId(orderId: Int): Boolean {
+        return dbQuery {
+            OrderFileTable.deleteWhere { OrderFileTable.orderId eq orderId } > 0
+        }
+    }
+
     override suspend fun countFilesByOrderId(orderId: Int): Int {
         return dbQuery {
             OrderFileTable.select { OrderFileTable.orderId eq orderId }
@@ -69,4 +75,3 @@ class OrderFileRepositoryImpl : OrderFileRepository {
         )
     }
 }
-

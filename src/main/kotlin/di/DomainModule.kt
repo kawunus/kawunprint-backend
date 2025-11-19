@@ -16,8 +16,6 @@ val domainModule = module {
 
     factoryOf(::PrinterUseCase)
 
-    factoryOf(::CartUseCase)
-
     factoryOf(::OrderUseCase)
 
     factoryOf(::OrderHistoryUseCase)

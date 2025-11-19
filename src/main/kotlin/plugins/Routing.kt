@@ -16,7 +16,6 @@ fun Application.configureRouting() {
         filamentRoute()
         filamentTypeRoute()
         printerRoute()
-        cartRoute()
         orderRoute()
         orderHistoryRoute()
         orderStatusRoute()
@@ -24,7 +23,6 @@ fun Application.configureRouting() {
         orderFileRoute()
         adminFileRoute()
 
-        // Static file serving for local uploads
         staticFiles("/uploads", java.io.File("./uploads"))
 
         swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml") {

@@ -8,5 +8,5 @@ interface OrderFileRepository {
     suspend fun getFileById(fileId: Int): OrderFileModel?
     suspend fun deleteFile(fileId: Int): Boolean
     suspend fun countFilesByOrderId(orderId: Int): Int
+    suspend fun deleteFilesByOrderId(orderId: Int): Boolean
 }
-

@@ -1,6 +1,8 @@
 package routes
 
 import data.model.UserModel
+import data.model.responses.FileInfoResponse
+import data.model.responses.FileStatsResponse
 import domain.usecase.OrderFileUseCase
 import domain.usecase.OrderUseCase
 import io.ktor.http.*
@@ -146,38 +148,34 @@ fun Route.orderFileRoute() {
             // Get file upload statistics for order
             get("/stats") {
                 call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST)
-
                 val orderId = call.parameters["orderId"]?.toIntOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid order ID")
-
                 try {
                     val files = orderFileUseCase.getFilesByOrderId(orderId)
                     val totalSize = files.sumOf { it.fileSize }
                     val canUploadMore = orderFileUseCase.canUploadMoreFiles(orderId)
-
-                    val stats = mapOf(
-                        "orderId" to orderId,
-                        "totalFiles" to files.size,
-                        "maxFiles" to OrderFileUseCase.MAX_FILES_PER_ORDER,
-                        "remainingSlots" to (OrderFileUseCase.MAX_FILES_PER_ORDER - files.size),
-                        "totalSize" to totalSize,
-                        "totalSizeFormatted" to su.kawunprint.utils.FileUtils.formatFileSize(totalSize),
-                        "maxFileSize" to OrderFileUseCase.MAX_FILE_SIZE,
-                        "maxFileSizeFormatted" to su.kawunprint.utils.FileUtils.formatFileSize(OrderFileUseCase.MAX_FILE_SIZE.toLong()),
-                        "canUploadMore" to canUploadMore,
-                        "files" to files.map { file ->
-                            mapOf(
-                                "id" to file.id,
-                                "fileName" to file.fileName,
-                                "size" to file.fileSize,
-                                "sizeFormatted" to su.kawunprint.utils.FileUtils.formatFileSize(file.fileSize),
-                                "mimeType" to file.mimeType,
-                                "isImage" to su.kawunprint.utils.FileUtils.isImage(file.mimeType),
-                                "uploadedAt" to file.uploadedAt.toString()
+                    val stats = FileStatsResponse(
+                        orderId = orderId,
+                        totalFiles = files.size,
+                        maxFiles = OrderFileUseCase.MAX_FILES_PER_ORDER,
+                        remainingSlots = OrderFileUseCase.MAX_FILES_PER_ORDER - files.size,
+                        totalSize = totalSize,
+                        totalSizeFormatted = su.kawunprint.utils.FileUtils.formatFileSize(totalSize),
+                        maxFileSize = OrderFileUseCase.MAX_FILE_SIZE,
+                        maxFileSizeFormatted = su.kawunprint.utils.FileUtils.formatFileSize(OrderFileUseCase.MAX_FILE_SIZE.toLong()),
+                        canUploadMore = canUploadMore,
+                        files = files.map { file ->
+                            FileInfoResponse(
+                                id = file.id,
+                                fileName = file.fileName,
+                                size = file.fileSize,
+                                sizeFormatted = su.kawunprint.utils.FileUtils.formatFileSize(file.fileSize),
+                                mimeType = file.mimeType,
+                                isImage = su.kawunprint.utils.FileUtils.isImage(file.mimeType),
+                                uploadedAt = file.uploadedAt
                             )
                         }
                     )
-
                     call.respond(HttpStatusCode.OK, stats)
                 } catch (e: Exception) {
                     e.printStackTrace()
