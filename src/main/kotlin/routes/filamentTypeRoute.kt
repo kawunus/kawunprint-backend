@@ -18,11 +18,13 @@ fun Route.filamentTypeRoute() {
     authenticate("jwt") {
         route("/api/v1/filaments/types") {
             get {
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST, RoleModel.CLIENT)
                 val filamentTypes = filamentTypeUseCase.getAllFilamentTypes()
                 call.respond(HttpStatusCode.OK, filamentTypes)
             }
 
             get("/{id}") {
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST, RoleModel.CLIENT)
                 val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
                 val filamentType = filamentTypeUseCase.getFilamentTypeById(id.toInt()) ?: return@get call.respond(
                     HttpStatusCode.NotFound

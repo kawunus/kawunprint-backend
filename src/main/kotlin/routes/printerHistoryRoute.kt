@@ -18,13 +18,13 @@ fun Route.printerHistoryRoute() {
         route("/api/v1/printer-history") {
 
             get {
-                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST)
                 val histories = printerHistoryUseCase.getAll()
                 call.respond(HttpStatusCode.OK, histories)
             }
 
             get("/{id}") {
-                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST)
                 val id = call.parameters["id"]?.toIntOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
                 val history = printerHistoryUseCase.getById(id)

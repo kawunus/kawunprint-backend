@@ -30,14 +30,14 @@ fun Route.orderRoute() {
     authenticate("jwt") {
         route("/api/v1/orders") {
             get {
-                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST)
 
                 val orders = orderUseCase.getAllOrders()
                 call.respond(HttpStatusCode.OK, orders)
             }
 
             get("/{id}") {
-                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST)
                 val id = call.parameters["id"]?.toIntOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
 

@@ -18,13 +18,13 @@ fun Route.printerRoute() {
         route("/api/v1/printers") {
 
             get {
-                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST)
                 val printers = printerUseCase.getAllPrinters()
                 call.respond(HttpStatusCode.OK, printers)
             }
 
             get("/active") {
-                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST)
                 val state = call.request.queryParameters["state"]?.toBooleanStrictOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "Missing or invalid 'state' query param")
                 val printers = printerUseCase.getPrintersByActiveState(state)
@@ -32,7 +32,7 @@ fun Route.printerRoute() {
             }
 
             get("/{id}") {
-                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST)
                 val id = call.parameters["id"]?.toIntOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
                 val printer = printerUseCase.getPrinterById(id)

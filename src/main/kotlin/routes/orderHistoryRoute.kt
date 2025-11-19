@@ -26,7 +26,7 @@ fun Route.orderHistoryRoute() {
                 val orderId = call.parameters["orderId"]?.toIntOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
 
-                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE)
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST)
 
                 orderUseCase.getOrderById(orderId)
                     ?: return@get call.respond(HttpStatusCode.NotFound, "Order not found")

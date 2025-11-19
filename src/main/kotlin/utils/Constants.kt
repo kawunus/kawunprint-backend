@@ -5,6 +5,7 @@ object Constants {
         const val ADMIN = "admin"
         const val CLIENT = "client"
         const val EMPLOYEE = "employee"
+        const val ANALYST = "analyst"
     }
 
     object ErrorMessages {

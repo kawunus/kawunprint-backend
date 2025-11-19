@@ -181,7 +181,7 @@ fun Route.userRoute() {
             }
 
             get {
-                call.authenticateWithRole(RoleModel.ADMIN)
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.ANALYST)
                 try {
                     val users = userUseCase.getAllUsers()
                     call.respond(HttpStatusCode.OK, users)
@@ -192,7 +192,7 @@ fun Route.userRoute() {
             }
 
             get("/{id}") {
-                call.authenticateWithRole(RoleModel.ADMIN)
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.ANALYST)
                 val id = call.parameters["id"]?.toIntOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
                 val user = userUseCase.getUserById(id)

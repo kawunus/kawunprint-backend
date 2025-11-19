@@ -22,6 +22,7 @@ fun Route.filamentRoute() {
         route("/api/v1/filaments") {
 
             get {
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST, RoleModel.CLIENT)
                 val typeIdParam = call.request.queryParameters["typeId"]?.toIntOrNull()
                 val filaments = if (typeIdParam != null) {
                     val type = filamentTypeUseCase.getFilamentTypeById(typeIdParam)
@@ -35,6 +36,7 @@ fun Route.filamentRoute() {
             }
 
             get("/{id}") {
+                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST, RoleModel.CLIENT)
                 val id = call.parameters["id"]?.toIntOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
                 val filament = filamentUseCase.getAllFilaments().find { it.id == id }
