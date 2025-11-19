@@ -1,6 +1,7 @@
 package su.kawunprint.plugins
 
 import io.ktor.server.application.*
+import io.ktor.server.http.content.*
 import io.ktor.server.plugins.swagger.*
 import io.ktor.server.routing.*
 import routes.*
@@ -15,11 +16,15 @@ fun Application.configureRouting() {
         filamentRoute()
         filamentTypeRoute()
         printerRoute()
-        cartRoute()
         orderRoute()
         orderHistoryRoute()
         orderStatusRoute()
         printerHistoryRoute()
+        orderFileRoute()
+        adminFileRoute()
+
+        staticFiles("/uploads", java.io.File("./uploads"))
+
         swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml") {
             version = "4.15.5" // версия Swagger UI
         }

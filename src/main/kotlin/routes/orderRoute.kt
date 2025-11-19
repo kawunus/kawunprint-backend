@@ -29,6 +29,21 @@ fun Route.orderRoute() {
 
     authenticate("jwt") {
         route("/api/v1/orders") {
+
+            // ВАЖНО: /my должен быть ПЕРВЫМ, до /{id}!
+            get("/my") {
+                val principal = call.principal<UserModel>()
+                    ?: return@get call.respond(HttpStatusCode.Unauthorized)
+
+                val orders = if (principal.role == RoleModel.CLIENT) {
+                    orderUseCase.getOrdersByCustomerId(principal.id)
+                } else {
+                    orderUseCase.getAllOrders()
+                }
+
+                call.respond(HttpStatusCode.OK, orders)
+            }
+
             get {
                 call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST)
 
@@ -36,24 +51,29 @@ fun Route.orderRoute() {
                 call.respond(HttpStatusCode.OK, orders)
             }
 
+            // ИСПРАВЛЕНО: Убрали authenticateWithRole, добавили ручную проверку для CLIENT
             get("/{id}") {
-                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST)
+                val principal = call.principal<UserModel>()
+                    ?: return@get call.respond(HttpStatusCode.Unauthorized)
+
                 val id = call.parameters["id"]?.toIntOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest)
 
                 val order = orderUseCase.getOrderById(id)
                     ?: return@get call.respond(HttpStatusCode.NotFound)
 
+                // Если CLIENT - проверяем, что это его заказ
+                if (principal.role == RoleModel.CLIENT && order.customer.id != principal.id) {
+                    return@get call.respond(HttpStatusCode.Forbidden, "You can only view your own orders")
+                }
+
                 call.respond(HttpStatusCode.OK, order)
             }
 
             post {
-                // Allow admin/employee to create an order for a customer specified in body.
-                // The X-User-Id header (if present) is treated as the acting employee ID for audit only.
                 call.principal<UserModel>()
                     ?: return@post call.respond(HttpStatusCode.Unauthorized)
 
-                // employeeId for audit can be present in header
                 val employeeId = call.request.headers["X-User-Id"]?.toIntOrNull()
 
                 val body = call.receive<CreateOrderRequest>()
@@ -104,7 +124,10 @@ fun Route.orderRoute() {
                     statusId = body.statusId,
                     totalPrice = body.totalPrice,
                     comment = body.comment,
-                    completedAt = existingOrder.completedAt
+                    completedAt = body.completedAt?.let {
+                        // Парсим ISO 8601 с поддержкой миллисекунд и UTC (Z)
+                        java.time.ZonedDateTime.parse(it).toLocalDateTime()
+                    } ?: existingOrder.completedAt  // Оставить старое значение если не передано
                 )
 
                 orderUseCase.updateOrder(updatedOrder)
@@ -137,7 +160,6 @@ fun Route.orderRoute() {
                 val employeeId = principal.id
 
                 try {
-                    // Delegate transactional work to data layer through usecase
                     filamentUseCase.consumeFilamentForOrder(
                         orderId,
                         request.filamentId,
@@ -146,13 +168,11 @@ fun Route.orderRoute() {
                         request.comment
                     )
 
-                    // fetch updated models via usecases (separate queries)
                     val updatedOrder = orderUseCase.getOrderById(orderId)
                         ?: return@post call.respond(HttpStatusCode.InternalServerError)
                     val updatedFilament = filamentUseCase.getFilamentById(request.filamentId)
                         ?: return@post call.respond(HttpStatusCode.InternalServerError)
 
-                    // Map to response DTOs with consistent numeric types
                     val orderResp = OrderResponse(
                         id = updatedOrder.id,
                         statusId = updatedOrder.statusId,
@@ -186,7 +206,6 @@ fun Route.orderRoute() {
                     e.printStackTrace()
                     return@post call.respond(HttpStatusCode.InternalServerError)
                 } catch (e: IllegalStateException) {
-                    // message format: "insufficient:{residue}"
                     val parts = e.message?.split(":") ?: listOf()
                     val residue = parts.getOrNull(1) ?: "0"
                     return@post call.respond(

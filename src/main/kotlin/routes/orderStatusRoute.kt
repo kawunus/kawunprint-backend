@@ -18,7 +18,6 @@ fun Route.orderStatusRoute() {
         route("/api/v1/order-status") {
 
             get {
-                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST)
                 val statuses = orderStatusUseCase.getAll()
                 call.respond(HttpStatusCode.OK, statuses)
             }

@@ -56,6 +56,10 @@ dependencies {
     implementation("io.insert-koin:koin-ktor:$koin_version")
     implementation("io.insert-koin:koin-logger-slf4j:$koin_version")
 
+    // Firebase Admin SDK
+    implementation("com.google.firebase:firebase-admin:9.3.0")
+    implementation("com.google.cloud:google-cloud-storage:2.32.1")
+
     // Testing
     testImplementation("io.ktor:ktor-server-test-host:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
