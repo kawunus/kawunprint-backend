@@ -26,7 +26,7 @@ object Databases {
         transaction {
             SchemaUtils.create(
                 UserTable, FilamentTable, FilamentTypeTable, OrderTable, OrderHistoryTable, PrinterTable,
-                OrderStatusTable, PrinterHistoryTable, OrderFileTable
+                OrderStatusTable, PrinterHistoryTable, OrderFileTable, EmailVerificationCodeTable
             )
         }
     }

@@ -25,4 +25,6 @@ val domainModule = module {
     factoryOf(::PrinterHistoryUseCase)
 
     factoryOf(::OrderFileUseCase)
+
+    factoryOf(::EmailVerificationUseCase)
 }

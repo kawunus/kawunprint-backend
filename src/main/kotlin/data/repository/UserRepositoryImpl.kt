@@ -82,6 +82,11 @@ class UserRepositoryImpl : UserRepository {
         }
     }
 
+    override suspend fun activateUser(userId: Int): Boolean = dbQuery {
+        UserTable.update({ UserTable.id eq userId }) {
+            it[isActive] = true
+        } > 0
+    }
 
     private fun rowToUser(row: ResultRow?): UserModel? {
         if (row == null) {

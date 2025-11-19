@@ -18,4 +18,6 @@ interface UserRepository {
     suspend fun getAllUsers(): List<UserModel>
 
     suspend fun getUserById(userId: Int): UserModel?
+
+    suspend fun activateUser(userId: Int): Boolean
 }

@@ -28,6 +28,7 @@ class JwtService {
             .withClaim("name", "${user.firstName} ${user.lastName}")
             .withClaim("role", user.role.name)
             .withClaim("id", user.id)
+            .withClaim("isActive", user.isActive)
             .withExpiresAt(LocalDateTime.now().plusDays(8).toInstant(ZoneOffset.UTC))
             .sign(algorithm)
     }
