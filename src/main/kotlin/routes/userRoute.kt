@@ -3,6 +3,7 @@ package su.kawunprint.routes
 import data.model.UserModel
 import data.model.requests.user.UpdateSelfUserRequest
 import data.model.requests.user.UpdateUserRequest
+import data.model.responses.UserProfileResponse
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
@@ -89,7 +90,19 @@ fun Route.userRoute() {
             get("/me") {
                 val principal = call.principal<UserModel>() ?: return@get call.respond(HttpStatusCode.Unauthorized)
                 val user = userUseCase.getUserById(principal.id) ?: return@get call.respond(HttpStatusCode.NotFound)
-                call.respond(HttpStatusCode.OK, user)
+
+                // Return profile without password field
+                val profileResponse = UserProfileResponse(
+                    id = user.id,
+                    firstName = user.firstName,
+                    lastName = user.lastName,
+                    email = user.email,
+                    phoneNumber = user.phoneNumber,
+                    telegramAccount = user.telegramAccount,
+                    role = user.role,
+                    isActive = user.isActive
+                )
+                call.respond(HttpStatusCode.OK, profileResponse)
             }
 
             put("/me") {
@@ -97,20 +110,50 @@ fun Route.userRoute() {
                 val request = call.receive<UpdateSelfUserRequest>()
 
                 try {
-                    val updated = userUseCase.updateUser(
+                    // 1. Get current user from DB
+                    val currentUser = userUseCase.getUserById(principal.id)
+                        ?: return@put call.respond(HttpStatusCode.NotFound)
+
+                    // 2. Verify currentPassword
+                    if (currentUser.password != hashFunction(request.currentPassword)) {
+                        return@put call.respond(HttpStatusCode.Unauthorized, "Неверный пароль")
+                    }
+
+                    // 3. Determine password to use (old or new)
+                    val passwordToSet = if (!request.newPassword.isNullOrBlank()) {
+                        hashFunction(request.newPassword)
+                    } else {
+                        currentUser.password
+                    }
+
+                    userUseCase.updateUser(
                         UserModel(
                             id = principal.id,
                             firstName = request.firstName,
                             lastName = request.lastName,
                             email = request.email,
                             phoneNumber = request.phoneNumber,
-                            telegramAccount = principal.telegramAccount,
-                            password = hashFunction(request.password),
+                            telegramAccount = currentUser.telegramAccount,
+                            password = passwordToSet,
                             role = principal.role,
                             isActive = principal.isActive
                         )
                     )
-                    call.respond(HttpStatusCode.OK, updated)
+
+                    val updated = userUseCase.getUserById(principal.id)
+                        ?: return@put call.respond(HttpStatusCode.InternalServerError)
+
+                    val profileResponse = UserProfileResponse(
+                        id = updated.id,
+                        firstName = updated.firstName,
+                        lastName = updated.lastName,
+                        email = updated.email,
+                        phoneNumber = updated.phoneNumber,
+                        telegramAccount = updated.telegramAccount,
+                        role = updated.role,
+                        isActive = updated.isActive
+                    )
+                    call.respond(HttpStatusCode.OK, profileResponse)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     call.respond(HttpStatusCode.InternalServerError)

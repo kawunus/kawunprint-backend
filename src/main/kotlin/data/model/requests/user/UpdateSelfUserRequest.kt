@@ -8,6 +8,7 @@ data class UpdateSelfUserRequest(
     val lastName: String,
     val email: String,
     val phoneNumber: String,
-    val password: String
+    val currentPassword: String,  // обязательное - для подтверждения
+    val newPassword: String? = null  // опциональное - только если хочет сменить пароль
 )
 
