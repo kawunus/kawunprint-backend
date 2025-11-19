@@ -36,3 +36,5 @@ out/
 .vscode/
 
 .env
+firebase-secret.json
+FRONTEND_API_SPEC.md

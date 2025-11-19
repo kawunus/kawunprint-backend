@@ -1,6 +1,7 @@
 package su.kawunprint.plugins
 
 import io.ktor.server.application.*
+import io.ktor.server.http.content.*
 import io.ktor.server.plugins.swagger.*
 import io.ktor.server.routing.*
 import routes.*
@@ -20,6 +21,12 @@ fun Application.configureRouting() {
         orderHistoryRoute()
         orderStatusRoute()
         printerHistoryRoute()
+        orderFileRoute()
+        adminFileRoute()
+
+        // Static file serving for local uploads
+        staticFiles("/uploads", java.io.File("./uploads"))
+
         swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml") {
             version = "4.15.5" // версия Swagger UI
         }

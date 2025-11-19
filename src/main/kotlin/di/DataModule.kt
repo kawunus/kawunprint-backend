@@ -12,9 +12,13 @@ import su.kawunprint.data.repository.OrderRepositoryImpl
 import su.kawunprint.domain.repository.FilamentRepository
 import su.kawunprint.domain.repository.FilamentTypeRepository
 import su.kawunprint.domain.repository.UserRepository
+import su.kawunprint.services.FirebaseStorageService
 
 val dataModule = module {
     singleOf(::JwtService)
+
+    // Eager singleton to initialize Firebase at startup
+    single(createdAtStart = true) { FirebaseStorageService() }
 
     singleOf(::UserRepositoryImpl) bind UserRepository::class
 
@@ -33,4 +37,6 @@ val dataModule = module {
     singleOf(::OrderStatusRepositoryImpl) bind OrderStatusRepository::class
 
     singleOf(::PrinterHistoryRepositoryImpl) bind PrinterHistoryRepository::class
+
+    singleOf(::OrderFileRepositoryImpl) bind OrderFileRepository::class
 }

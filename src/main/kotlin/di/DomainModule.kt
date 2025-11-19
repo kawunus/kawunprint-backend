@@ -25,4 +25,6 @@ val domainModule = module {
     factoryOf(::OrderStatusUseCase)
 
     factoryOf(::PrinterHistoryUseCase)
+
+    factoryOf(::OrderFileUseCase)
 }
