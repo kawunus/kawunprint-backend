@@ -12,7 +12,6 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
-import su.kawunprint.authentification.authenticateWithRole
 import su.kawunprint.data.model.RoleModel
 
 fun Route.orderFileRoute() {
@@ -24,14 +23,24 @@ fun Route.orderFileRoute() {
 
             // Get all files for an order
             get {
-                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST)
+                val principal = call.principal<UserModel>()
+                    ?: return@get call.respond(HttpStatusCode.Unauthorized)
 
                 val orderId = call.parameters["orderId"]?.toIntOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid order ID")
 
                 // Check if order exists
-                orderUseCase.getOrderById(orderId)
+                val order = orderUseCase.getOrderById(orderId)
                     ?: return@get call.respond(HttpStatusCode.NotFound, "Order not found")
+
+                // Check permissions: owner, admin, employee, or analyst can view files
+                if (order.customer.id != principal.id &&
+                    principal.role != RoleModel.ADMIN &&
+                    principal.role != RoleModel.EMPLOYEE &&
+                    principal.role != RoleModel.ANALYST
+                ) {
+                    return@get call.respond(HttpStatusCode.Forbidden, "You can only view files of your own orders")
+                }
 
                 val files = orderFileUseCase.getFilesByOrderId(orderId)
                 call.respond(HttpStatusCode.OK, files)
@@ -147,10 +156,26 @@ fun Route.orderFileRoute() {
 
             // Get file upload statistics for order
             get("/stats") {
-                call.authenticateWithRole(RoleModel.ADMIN, RoleModel.EMPLOYEE, RoleModel.ANALYST)
+                val principal = call.principal<UserModel>()
+                    ?: return@get call.respond(HttpStatusCode.Unauthorized)
+
                 val orderId = call.parameters["orderId"]?.toIntOrNull()
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid order ID")
+
                 try {
+                    // Check if order exists
+                    val order = orderUseCase.getOrderById(orderId)
+                        ?: return@get call.respond(HttpStatusCode.NotFound, "Order not found")
+
+                    // Check permissions: owner, admin, employee, or analyst can view stats
+                    if (order.customer.id != principal.id &&
+                        principal.role != RoleModel.ADMIN &&
+                        principal.role != RoleModel.EMPLOYEE &&
+                        principal.role != RoleModel.ANALYST
+                    ) {
+                        return@get call.respond(HttpStatusCode.Forbidden, "You can only view stats of your own orders")
+                    }
+
                     val files = orderFileUseCase.getFilesByOrderId(orderId)
                     val totalSize = files.sumOf { it.fileSize }
                     val canUploadMore = orderFileUseCase.canUploadMoreFiles(orderId)

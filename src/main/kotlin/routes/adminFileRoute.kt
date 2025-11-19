@@ -1,16 +1,38 @@
 package routes
 
 import data.model.UserModel
+import data.model.responses.AdminFileInfo
+import data.model.responses.AdminFileListResponse
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.Serializable
 import org.koin.ktor.ext.inject
 import su.kawunprint.authentification.authenticateWithRole
 import su.kawunprint.data.model.RoleModel
 import su.kawunprint.services.FirebaseStorageService
+
+@Serializable
+data class AdminFileUploadResponse(
+    val success: Boolean,
+    val fileName: String,
+    val fileUrl: String,
+    val storagePath: String,
+    val fileSize: Int,
+    val mimeType: String,
+    val uploadedBy: Int,
+    val uploadedAt: String
+)
+
+@Serializable
+data class AdminFileDeleteResponse(
+    val success: Boolean,
+    val message: String,
+    val path: String? = null
+)
 
 fun Route.adminFileRoute() {
     val firebaseStorageService: FirebaseStorageService by inject()
@@ -71,15 +93,15 @@ fun Route.adminFileRoute() {
                         storagePath
                     )
 
-                    val response = mapOf(
-                        "success" to true,
-                        "fileName" to fileName,
-                        "fileUrl" to publicUrl,
-                        "storagePath" to finalStoragePath,
-                        "fileSize" to fileBytes.size,
-                        "mimeType" to mimeType,
-                        "uploadedBy" to principal.id,
-                        "uploadedAt" to java.time.LocalDateTime.now().toString()
+                    val response = AdminFileUploadResponse(
+                        success = true,
+                        fileName = fileName,
+                        fileUrl = publicUrl,
+                        storagePath = finalStoragePath,
+                        fileSize = fileBytes.size,
+                        mimeType = mimeType,
+                        uploadedBy = principal.id,
+                        uploadedAt = java.time.LocalDateTime.now().toString()
                     )
 
                     call.respond(HttpStatusCode.Created, response)
@@ -100,20 +122,18 @@ fun Route.adminFileRoute() {
                 try {
                     val deleted = firebaseStorageService.deleteFile(storagePath)
                     if (deleted) {
-                        call.respond(
-                            HttpStatusCode.OK, mapOf(
-                                "success" to true,
-                                "message" to "File deleted successfully",
-                                "path" to storagePath
-                            )
+                        val response = AdminFileDeleteResponse(
+                            success = true,
+                            message = "File deleted successfully",
+                            path = storagePath
                         )
+                        call.respond(HttpStatusCode.OK, response)
                     } else {
-                        call.respond(
-                            HttpStatusCode.NotFound, mapOf(
-                                "success" to false,
-                                "message" to "File not found or already deleted"
-                            )
+                        val response = AdminFileDeleteResponse(
+                            success = false,
+                            message = "File not found or already deleted"
                         )
+                        call.respond(HttpStatusCode.NotFound, response)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -121,23 +141,28 @@ fun Route.adminFileRoute() {
                 }
             }
 
-            // Admin: List files by path prefix
             get("/list") {
                 call.authenticateWithRole(RoleModel.ADMIN)
 
-                val pathPrefix = call.request.queryParameters["prefix"] ?: "admin/"
+                val pathPrefix = call.request.queryParameters["prefix"] ?: "" // По умолчанию все файлы
                 val maxResults = call.request.queryParameters["limit"]?.toIntOrNull() ?: 100
 
                 try {
-                    val files = firebaseStorageService.listFiles(pathPrefix, maxResults)
-                    call.respond(
-                        HttpStatusCode.OK, mapOf(
-                            "success" to true,
-                            "prefix" to pathPrefix,
-                            "count" to files.size,
-                            "files" to files
+                    val filesRaw = firebaseStorageService.listFiles(pathPrefix, maxResults)
+                    val files = filesRaw.map { fileMap ->
+                        AdminFileInfo(
+                            name = fileMap["name"] as? String ?: "",
+                            size = (fileMap["size"] as? Number)?.toLong(),
+                            url = fileMap["url"] as? String
                         )
+                    }
+                    val response = AdminFileListResponse(
+                        success = true,
+                        prefix = pathPrefix.ifEmpty { "all" },
+                        count = files.size,
+                        files = files
                     )
+                    call.respond(HttpStatusCode.OK, response)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     call.respond(HttpStatusCode.InternalServerError, "List failed: ${e.message}")
@@ -146,4 +171,3 @@ fun Route.adminFileRoute() {
         }
     }
 }
-
